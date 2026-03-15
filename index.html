@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zentrust Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #0d1117;
+  --surface: #131b2e;
+  --card: #1a2236;
+  --border: rgba(255,255,255,0.06);
+  --accent: #3a9fb0;
+  --accent-soft: rgba(58,159,176,0.12);
+  --green: #4ade80;
+  --green-soft: rgba(74,222,128,0.12);
+  --amber: #f59e0b;
+  --amber-soft: rgba(245,158,11,0.12);
+  --red: #ef4444;
+  --red-soft: rgba(239,68,68,0.12);
+  --blue: #3b82f6;
+  --blue-soft: rgba(59,130,246,0.12);
+  --text: rgba(255,255,255,0.9);
+  --text-secondary: rgba(255,255,255,0.5);
+  --text-dim: rgba(255,255,255,0.25);
+  --font: 'Outfit', -apple-system, sans-serif;
+}
+html, body { height:100%; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+
+/* LOGIN */
+.login-page {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:var(--bg);
+}
+.login-box {
+  width:380px; background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:40px 36px; text-align:center;
+}
+.login-logo { font-size:28px; font-weight:700; margin-bottom:6px; color:#fff; letter-spacing:1.5px; }
+.login-sub { font-size:13px; color:var(--text-secondary); margin-bottom:32px; }
+.login-input {
+  width:100%; padding:13px 16px; background:rgba(255,255,255,0.04);
+  border:1px solid var(--border); border-radius:10px; font-family:var(--font);
+  font-size:14px; color:var(--text); outline:none; transition:border-color 0.2s;
+  margin-bottom:12px;
+}
+.login-input:focus { border-color:var(--accent); }
+.login-input::placeholder { color:var(--text-dim); }
+.login-btn {
+  width:100%; padding:14px; background:var(--accent); color:#fff; border:none;
+  border-radius:10px; font-family:var(--font); font-size:14px; font-weight:600;
+  cursor:pointer; margin-top:8px; transition:background 0.2s;
+}
+.login-btn:hover { background:#4dbbc9; color:#0d1117; }
+.login-btn:disabled { background:rgba(255,255,255,0.06); color:var(--text-dim); cursor:wait; }
+.login-error { font-size:12px; color:var(--red); margin-top:12px; display:none; }
+
+/* LAYOUT */
+.app { display:none; min-height:100vh; }
+.sidebar {
+  position:fixed; top:0; left:0; bottom:0; width:220px;
+  background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; padding:24px 0; z-index:10;
+}
+.sidebar-logo {
+  font-size:20px; font-weight:700; padding:0 24px; margin-bottom:32px;
+  color:#fff; letter-spacing:1.5px;
+}
+.sidebar-nav { display:flex; flex-direction:column; gap:2px; padding:0 12px; flex:1; }
+.sidebar-link {
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  border-radius:8px; font-size:13px; font-weight:500; color:var(--text-secondary);
+  cursor:pointer; transition:all 0.15s; text-decoration:none; border:none; background:none;
+  font-family:var(--font); width:100%; text-align:left;
+}
+.sidebar-link:hover { background:rgba(255,255,255,0.04); color:var(--text); }
+.sidebar-link.active { background:var(--accent-soft); color:var(--accent); }
+.sidebar-link svg { width:18px; height:18px; opacity:0.6; }
+.sidebar-bottom {
+  padding:16px 24px; border-top:1px solid var(--border);
+  display:flex; flex-direction:column; gap:8px;
+}
+.sidebar-user { font-size:12px; color:var(--text-secondary); }
+.sidebar-role { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; }
+.logout-btn {
+  background:none; border:1px solid var(--border); color:var(--text-secondary);
+  padding:8px; border-radius:6px; font-size:11px; font-family:var(--font);
+  cursor:pointer; transition:all 0.15s; text-transform:uppercase; letter-spacing:0.5px;
+}
+.logout-btn:hover { border-color:var(--red); color:var(--red); }
+
+.main { margin-left:220px; padding:32px; }
+.page-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:28px;
+}
+.page-title { font-size:22px; font-weight:600; }
+.page-venue { font-size:13px; color:var(--text-secondary); margin-top:4px; }
+.header-badge {
+  font-size:11px; font-weight:500; padding:6px 14px; border-radius:6px;
+  background:var(--green-soft); color:var(--green); text-transform:uppercase; letter-spacing:0.5px;
+}
+
+/* METRIC CARDS */
+.metrics-grid {
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:28px;
+}
+.metric-card {
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:22px 20px; transition:all 0.2s;
+}
+.metric-card:hover { border-color:rgba(255,255,255,0.1); }
+.metric-label {
+  font-size:11px; font-weight:500; color:var(--text-dim);
+  text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;
+}
+.metric-value { font-size:32px; font-weight:600; line-height:1; margin-bottom:4px; }
+.metric-sub { font-size:12px; color:var(--text-secondary); }
+.metric-accent { color:var(--accent); }
+.metric-green { color:var(--green); }
+.metric-amber { color:var(--amber); }
+
+/* TWO COLUMN LAYOUT */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+
+/* CHART AREA */
+.chart-card {
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:24px; min-height:280px;
+}
+.chart-title {
+  font-size:14px; font-weight:600; margin-bottom:16px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.chart-title span { font-size:11px; color:var(--text-dim); font-weight:400; }
+.chart-area { position:relative; height:200px; }
+.chart-bar-container {
+  display:flex; align-items:flex-end; gap:4px; height:100%;
+  padding-bottom:24px; position:relative;
+}
+.chart-bar-wrapper { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.chart-bar {
+  width:100%; min-height:2px; border-radius:4px 4px 0 0;
+  background:var(--accent); opacity:0.8; transition:all 0.3s;
+}
+.chart-bar:hover { opacity:1; }
+.chart-bar-label {
+  font-size:9px; color:var(--text-dim); text-align:center; white-space:nowrap;
+}
+
+/* FUNNEL */
+.funnel-card {
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:24px;
+}
+.funnel-title { font-size:14px; font-weight:600; margin-bottom:20px; }
+.funnel-step {
+  display:flex; align-items:center; gap:14px; padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+.funnel-step:last-child { border-bottom:none; }
+.funnel-dot {
+  width:10px; height:10px; border-radius:50%; flex-shrink:0;
+}
+.funnel-step-label { flex:1; font-size:13px; color:var(--text-secondary); }
+.funnel-step-value { font-size:15px; font-weight:600; }
+.funnel-step-pct { font-size:11px; color:var(--text-dim); margin-left:6px; }
+
+/* LEADS TABLE */
+.table-card {
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  overflow:hidden;
+}
+.table-header {
+  padding:18px 24px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.table-header h3 { font-size:14px; font-weight:600; }
+.table-count { font-size:12px; color:var(--text-dim); }
+table {
+  width:100%; border-collapse:collapse; font-size:13px;
+}
+th {
+  text-align:left; padding:10px 16px; font-size:10px; font-weight:600;
+  text-transform:uppercase; letter-spacing:1px; color:var(--text-dim);
+  background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);
+}
+td {
+  padding:12px 16px; border-bottom:1px solid var(--border);
+  color:var(--text-secondary);
+}
+tr:hover td { background:rgba(255,255,255,0.02); }
+.badge {
+  display:inline-block; padding:3px 10px; border-radius:20px;
+  font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;
+}
+.badge-green { background:var(--green-soft); color:var(--green); }
+.badge-amber { background:var(--amber-soft); color:var(--amber); }
+.badge-red { background:var(--red-soft); color:var(--red); }
+.badge-blue { background:var(--blue-soft); color:var(--blue); }
+.badge-dim { background:rgba(255,255,255,0.04); color:var(--text-dim); }
+td.name-cell { color:var(--text); font-weight:500; }
+
+/* LOADING */
+.loading {
+  display:flex; align-items:center; justify-content:center;
+  min-height:200px; color:var(--text-dim); font-size:14px;
+}
+
+/* RESPONSIVE */
+@media (max-width:1024px) {
+  .metrics-grid { grid-template-columns:repeat(2, 1fr); }
+  .two-col { grid-template-columns:1fr; }
+}
+@media (max-width:768px) {
+  .sidebar { display:none; }
+  .main { margin-left:0; padding:20px; }
+  .metrics-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="login-page" id="login-page">
+  <div class="login-box">
+    <div class="login-logo">ZENI</div>
+    <div class="login-sub">Dashboard — Powered by Zentrust</div>
+    <input class="login-input" type="email" id="login-email" placeholder="Email address">
+    <input class="login-input" type="password" id="login-password" placeholder="Password">
+    <button class="login-btn" id="login-btn" onclick="handleLogin()">Sign In</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD APP -->
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">ZENI</div>
+    <div class="sidebar-nav">
+      <button class="sidebar-link active" data-page="overview" onclick="showPage('overview',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </button>
+      <button class="sidebar-link" data-page="leads" onclick="showPage('leads',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Leads
+      </button>
+      <button class="sidebar-link" data-page="followups" onclick="showPage('followups',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Follow-ups
+      </button>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" id="user-email">—</div>
+      <div class="sidebar-role" id="user-role">—</div>
+      <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- OVERVIEW PAGE -->
+    <div id="page-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Overview</div>
+          <div class="page-venue" id="venue-name">Loading...</div>
+        </div>
+        <div class="header-badge" id="status-badge">Live</div>
+      </div>
+
+      <div class="metrics-grid" id="metrics-grid">
+        <div class="metric-card"><div class="metric-label">Total Leads</div><div class="metric-value" id="m-total-leads">—</div><div class="metric-sub">All time</div></div>
+        <div class="metric-card"><div class="metric-label">Tours Booked</div><div class="metric-value metric-accent" id="m-tours-booked">—</div><div class="metric-sub" id="m-lead-to-tour">—</div></div>
+        <div class="metric-card"><div class="metric-label">Events Booked</div><div class="metric-value metric-green" id="m-events-booked">—</div><div class="metric-sub" id="m-conversion-rate">—</div></div>
+        <div class="metric-card"><div class="metric-label">Follow-up Opt-ins</div><div class="metric-value metric-amber" id="m-optins">—</div><div class="metric-sub" id="m-vendor-optins">—</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-title">Leads Over Time <span>Last 30 days</span></div>
+          <div class="chart-area" id="chart-leads"></div>
+        </div>
+        <div class="funnel-card">
+          <div class="funnel-title">Conversion Funnel</div>
+          <div id="funnel-steps"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADS PAGE -->
+    <div id="page-leads" style="display:none;">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Leads</div>
+          <div class="page-venue">All captured leads</div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Recent Leads</h3>
+          <div class="table-count" id="leads-count">—</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Event Date</th>
+                <th>Guests</th>
+                <th>Tour</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOLLOW-UPS PAGE -->
+    <div id="page-followups" style="display:none;">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Follow-up Stats</div>
+          <div class="page-venue">Email automation performance</div>
+        </div>
+      </div>
+      <div class="metrics-grid" id="followup-metrics"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// SUPABASE CONFIG
+// ============================================
+const SUPABASE_URL = 'https://wjwjylmixdwkxpraykyf.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_PUBLISHABLE_KEY_HERE'; // Safe — this is the public key
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let userRole = null;
+let userVenueId = null;
+
+// ============================================
+// AUTH
+// ============================================
+async function checkSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadUserRole();
+    showApp();
+  }
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+
+  if (!email || !password) { err.textContent = 'Please enter email and password'; err.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  err.style.display = 'none';
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    err.textContent = error.message; err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Sign In';
+    return;
+  }
+
+  currentUser = data.user;
+  await loadUserRole();
+  showApp();
+}
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  currentUser = null; userRole = null; userVenueId = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+}
+
+async function loadUserRole() {
+  const { data } = await supabase.rpc('get_user_role');
+  userRole = data || 'venue_staff';
+
+  const { data: vid } = await supabase.rpc('get_user_venue_id');
+  userVenueId = vid || null;
+
+  document.getElementById('user-email').textContent = currentUser.email;
+  document.getElementById('user-role').textContent = userRole === 'admin' ? 'Administrator' : 'Venue Staff';
+}
+
+function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadOverview();
+}
+
+// Enter key on password field
+document.getElementById('login-password').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') handleLogin();
+});
+
+// ============================================
+// PAGE NAVIGATION
+// ============================================
+function showPage(page, el) {
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + page).style.display = 'block';
+
+  if (page === 'overview') loadOverview();
+  else if (page === 'leads') loadLeads();
+  else if (page === 'followups') loadFollowups();
+}
+
+// ============================================
+// OVERVIEW
+// ============================================
+async function loadOverview() {
+  const { data: metrics, error } = await supabase.from('dashboard_metrics').select('*');
+
+  if (error || !metrics || metrics.length === 0) {
+    document.getElementById('venue-name').textContent = 'No data available';
+    return;
+  }
+
+  // If admin, aggregate all venues. If venue_staff, show their venue.
+  let m;
+  if (userRole === 'admin' && metrics.length > 1) {
+    m = {
+      venue_name: 'All Venues (' + metrics.length + ')',
+      total_leads: metrics.reduce((s, v) => s + (v.total_leads || 0), 0),
+      tours_booked: metrics.reduce((s, v) => s + (v.tours_booked || 0), 0),
+      events_booked: metrics.reduce((s, v) => s + (v.events_booked || 0), 0),
+      tours_attended: metrics.reduce((s, v) => s + (v.tours_attended || 0), 0),
+      tours_no_show: metrics.reduce((s, v) => s + (v.tours_no_show || 0), 0),
+      followup_optins: metrics.reduce((s, v) => s + (v.followup_optins || 0), 0),
+      vendor_optins: metrics.reduce((s, v) => s + (v.vendor_optins || 0), 0),
+      reminders_sent: metrics.reduce((s, v) => s + (v.reminders_sent || 0), 0),
+      attendance_checks_sent: metrics.reduce((s, v) => s + (v.attendance_checks_sent || 0), 0),
+      post_tour_emails_sent: metrics.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
+      nurture_emails_sent: metrics.reduce((s, v) => s + (v.nurture_emails_sent || 0), 0),
+      unsubscribed: metrics.reduce((s, v) => s + (v.unsubscribed || 0), 0),
+    };
+    m.lead_to_tour_rate = m.total_leads > 0 ? ((m.tours_booked / m.total_leads) * 100).toFixed(1) : 0;
+    m.event_booking_rate = m.tours_booked > 0 ? ((m.events_booked / m.tours_booked) * 100).toFixed(1) : 0;
+  } else {
+    m = metrics[0];
+  }
+
+  document.getElementById('venue-name').textContent = m.venue_name;
+  document.getElementById('m-total-leads').textContent = m.total_leads;
+  document.getElementById('m-tours-booked').textContent = m.tours_booked;
+  document.getElementById('m-lead-to-tour').textContent = m.lead_to_tour_rate + '% lead → tour';
+  document.getElementById('m-events-booked').textContent = m.events_booked;
+  document.getElementById('m-conversion-rate').textContent = m.event_booking_rate + '% tour → event';
+  document.getElementById('m-optins').textContent = m.followup_optins;
+  document.getElementById('m-vendor-optins').textContent = m.vendor_optins + ' vendor opt-ins';
+
+  // Funnel
+  const funnel = [
+    { label: 'Total Leads', value: m.total_leads, color: 'var(--accent)' },
+    { label: 'Tours Booked', value: m.tours_booked, color: 'var(--blue)' },
+    { label: 'Tours Attended', value: m.tours_attended, color: 'var(--amber)' },
+    { label: 'Events Booked', value: m.events_booked, color: 'var(--green)' },
+    { label: 'No-Shows', value: m.tours_no_show, color: 'var(--red)' },
+  ];
+  const funnelEl = document.getElementById('funnel-steps');
+  funnelEl.innerHTML = funnel.map(function(f) {
+    const pct = m.total_leads > 0 ? ((f.value / m.total_leads) * 100).toFixed(0) + '%' : '—';
+    return '<div class="funnel-step">'
+      + '<div class="funnel-dot" style="background:' + f.color + '"></div>'
+      + '<div class="funnel-step-label">' + f.label + '</div>'
+      + '<div class="funnel-step-value">' + f.value + '<span class="funnel-step-pct">' + pct + '</span></div>'
+      + '</div>';
+  }).join('');
+
+  // Load chart
+  loadChart();
+}
+
+async function loadChart() {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const { data } = await supabase.from('leads_by_date').select('*').gte('lead_date', thirtyDaysAgo).order('lead_date', { ascending: true });
+
+  const chartEl = document.getElementById('chart-leads');
+  if (!data || data.length === 0) {
+    chartEl.innerHTML = '<div class="loading">No data in the last 30 days</div>';
+    return;
+  }
+
+  const maxVal = Math.max(...data.map(d => d.lead_count), 1);
+  const bars = data.map(function(d) {
+    const h = Math.max((d.lead_count / maxVal) * 160, 2);
+    const dateLabel = new Date(d.lead_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return '<div class="chart-bar-wrapper">'
+      + '<div class="chart-bar" style="height:' + h + 'px;" title="' + dateLabel + ': ' + d.lead_count + ' leads"></div>'
+      + '<div class="chart-bar-label">' + dateLabel + '</div>'
+      + '</div>';
+  }).join('');
+
+  chartEl.innerHTML = '<div class="chart-bar-container">' + bars + '</div>';
+}
+
+// ============================================
+// LEADS TABLE
+// ============================================
+async function loadLeads() {
+  const { data: leads, error } = await supabase.from('recent_leads').select('*').limit(100);
+
+  if (error || !leads) {
+    document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="8" class="loading">Error loading leads</td></tr>';
+    return;
+  }
+
+  document.getElementById('leads-count').textContent = leads.length + ' leads';
+
+  const tbody = document.getElementById('leads-tbody');
+  tbody.innerHTML = leads.map(function(l) {
+    const phone = l.phone ? '(' + l.phone.slice(0,3) + ') ' + l.phone.slice(3,6) + '-' + l.phone.slice(6) : '—';
+    const created = l.created_at ? new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+
+    let statusBadge = '';
+    if (l.event_booked) statusBadge = '<span class="badge badge-green">Event Booked</span>';
+    else if (l.tour_attended === true) statusBadge = '<span class="badge badge-blue">Attended</span>';
+    else if (l.tour_attended === false) statusBadge = '<span class="badge badge-red">No-Show</span>';
+    else if (l.tour_booked) statusBadge = '<span class="badge badge-amber">Tour Booked</span>';
+    else statusBadge = '<span class="badge badge-dim">' + (l.lead_status || 'New') + '</span>';
+
+    const tourBadge = l.tour_booked ? '<span class="badge badge-green">Yes</span>' : '<span class="badge badge-dim">No</span>';
+
+    return '<tr>'
+      + '<td class="name-cell">' + (l.name || '—') + '</td>'
+      + '<td>' + (l.email || '—') + '</td>'
+      + '<td>' + phone + '</td>'
+      + '<td>' + (l.date_interest || '—') + '</td>'
+      + '<td>' + (l.guest_count || '—') + '</td>'
+      + '<td>' + tourBadge + '</td>'
+      + '<td>' + statusBadge + '</td>'
+      + '<td>' + created + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ============================================
+// FOLLOW-UPS
+// ============================================
+async function loadFollowups() {
+  const { data: metrics } = await supabase.from('dashboard_metrics').select('*');
+  if (!metrics || metrics.length === 0) return;
+
+  const m = userRole === 'admin' && metrics.length > 1
+    ? {
+        reminders_sent: metrics.reduce((s, v) => s + (v.reminders_sent || 0), 0),
+        attendance_checks_sent: metrics.reduce((s, v) => s + (v.attendance_checks_sent || 0), 0),
+        post_tour_emails_sent: metrics.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
+        nurture_emails_sent: metrics.reduce((s, v) => s + (v.nurture_emails_sent || 0), 0),
+        unsubscribed: metrics.reduce((s, v) => s + (v.unsubscribed || 0), 0),
+        followup_optins: metrics.reduce((s, v) => s + (v.followup_optins || 0), 0),
+      }
+    : metrics[0];
+
+  const stats = [
+    { label: 'Tour Reminders Sent', value: m.reminders_sent, color: 'var(--blue)' },
+    { label: 'Attendance Checks Sent', value: m.attendance_checks_sent, color: 'var(--amber)' },
+    { label: 'Post-Tour Emails', value: m.post_tour_emails_sent, color: 'var(--green)' },
+    { label: 'Nurture Emails', value: m.nurture_emails_sent, color: 'var(--accent)' },
+    { label: 'Follow-up Opt-ins', value: m.followup_optins, color: 'var(--green)' },
+    { label: 'Unsubscribed', value: m.unsubscribed, color: 'var(--red)' },
+  ];
+
+  document.getElementById('followup-metrics').innerHTML = stats.map(function(s) {
+    return '<div class="metric-card">'
+      + '<div class="metric-label">' + s.label + '</div>'
+      + '<div class="metric-value" style="color:' + s.color + '">' + s.value + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ============================================
+// INIT
+// ============================================
+checkSession();
+</script>
+</body>
+</html>
