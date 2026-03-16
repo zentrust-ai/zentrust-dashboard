@@ -273,10 +273,11 @@ td.name-cell { color:var(--text); font-weight:500; }
         <div class="header-badge" id="status-badge">Live</div>
       </div>
 
-      <div class="metrics-grid" id="metrics-grid">
+      <div class="metrics-grid" id="metrics-grid" style="grid-template-columns:repeat(5, 1fr);">
         <div class="metric-card"><div class="metric-label">Total Leads</div><div class="metric-value" id="m-total-leads">—</div><div class="metric-sub">All time</div></div>
         <div class="metric-card"><div class="metric-label">Tours Booked</div><div class="metric-value metric-accent" id="m-tours-booked">—</div><div class="metric-sub" id="m-lead-to-tour">—</div></div>
         <div class="metric-card"><div class="metric-label">Events Booked</div><div class="metric-value metric-green" id="m-events-booked">—</div><div class="metric-sub" id="m-conversion-rate">—</div></div>
+        <div class="metric-card"><div class="metric-label">Zeni Revenue</div><div class="metric-value" id="m-revenue" style="color:#10b981;">—</div><div class="metric-sub" id="m-avg-revenue">—</div></div>
         <div class="metric-card"><div class="metric-label">Follow-up Opt-ins</div><div class="metric-value metric-amber" id="m-optins">—</div><div class="metric-sub" id="m-vendor-optins">—</div></div>
       </div>
 
@@ -316,6 +317,7 @@ td.name-cell { color:var(--text); font-weight:500; }
                 <th>Guests</th>
                 <th>Tour</th>
                 <th>Status</th>
+                <th>Revenue</th>
                 <th>Created</th>
               </tr>
             </thead>
@@ -343,7 +345,7 @@ td.name-cell { color:var(--text); font-weight:500; }
 // SUPABASE CONFIG
 // ============================================
 const SUPABASE_URL = 'https://wjwjylmixdwkxpraykyf.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_SB_S9l1bdJTVSZ0qp44XoA_2HSJe32-'; // Safe — this is the public key
+const SUPABASE_ANON_KEY = 'YOUR_PUBLISHABLE_KEY_HERE'; // Safe — this is the public key
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
@@ -452,6 +454,7 @@ async function loadOverview() {
       tours_no_show: metrics.reduce((s, v) => s + (v.tours_no_show || 0), 0),
       followup_optins: metrics.reduce((s, v) => s + (v.followup_optins || 0), 0),
       vendor_optins: metrics.reduce((s, v) => s + (v.vendor_optins || 0), 0),
+      total_revenue: metrics.reduce((s, v) => s + (parseFloat(v.total_revenue) || 0), 0),
       reminders_sent: metrics.reduce((s, v) => s + (v.reminders_sent || 0), 0),
       attendance_checks_sent: metrics.reduce((s, v) => s + (v.attendance_checks_sent || 0), 0),
       post_tour_emails_sent: metrics.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
@@ -472,6 +475,12 @@ async function loadOverview() {
   document.getElementById('m-conversion-rate').textContent = m.event_booking_rate + '% tour → event';
   document.getElementById('m-optins').textContent = m.followup_optins;
   document.getElementById('m-vendor-optins').textContent = m.vendor_optins + ' vendor opt-ins';
+
+  // Revenue
+  var rev = parseFloat(m.total_revenue) || 0;
+  document.getElementById('m-revenue').textContent = '$' + rev.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  var avgRev = m.events_booked > 0 ? Math.round(rev / m.events_booked) : 0;
+  document.getElementById('m-avg-revenue').textContent = avgRev > 0 ? '$' + avgRev.toLocaleString() + ' avg per event' : 'No events yet';
 
   // Funnel
   const funnel = [
@@ -525,7 +534,7 @@ async function loadLeads() {
   const { data: leads, error } = await sb.from('recent_leads').select('*').limit(100);
 
   if (error || !leads) {
-    document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="8" class="loading">Error loading leads</td></tr>';
+    document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="9" class="loading">Error loading leads</td></tr>';
     return;
   }
 
@@ -545,6 +554,24 @@ async function loadLeads() {
 
     const tourBadge = l.tour_booked ? '<span class="badge badge-green">Yes</span>' : '<span class="badge badge-dim">No</span>';
 
+    let revenueCell = '';
+    if (l.event_booked) {
+      var savedRev = l.event_revenue ? '$' + parseFloat(l.event_revenue).toLocaleString() : '';
+      revenueCell = '<td>'
+        + '<div style="display:flex;align-items:center;gap:6px;">'
+        + '<input type="text" id="rev-' + l.session_id + '" placeholder="Estimated Final Price" '
+        + 'value="' + savedRev + '" '
+        + 'style="width:130px;padding:6px 10px;background:' + 'rgba(255,255,255,0.04)' + ';border:1px solid rgba(255,255,255,0.1);border-radius:6px;'
+        + 'font-size:12px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none;" '
+        + 'onkeypress="if(event.key===\'Enter\')saveRevenue(\'' + l.session_id + '\')">'
+        + '<button onclick="saveRevenue(\'' + l.session_id + '\')" '
+        + 'style="padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;'
+        + 'font-size:10px;font-family:Outfit,sans-serif;cursor:pointer;white-space:nowrap;">Save</button>'
+        + '</div></td>';
+    } else {
+      revenueCell = '<td style="color:var(--text-dim);">—</td>';
+    }
+
     return '<tr>'
       + '<td class="name-cell">' + (l.name || '—') + '</td>'
       + '<td>' + (l.email || '—') + '</td>'
@@ -553,6 +580,7 @@ async function loadLeads() {
       + '<td>' + (l.guest_count || '—') + '</td>'
       + '<td>' + tourBadge + '</td>'
       + '<td>' + statusBadge + '</td>'
+      + revenueCell
       + '<td>' + created + '</td>'
       + '</tr>';
   }).join('');
@@ -591,6 +619,30 @@ async function loadFollowups() {
       + '<div class="metric-value" style="color:' + s.color + '">' + s.value + '</div>'
       + '</div>';
   }).join('');
+}
+
+// ============================================
+// SAVE REVENUE
+// ============================================
+async function saveRevenue(sessionId) {
+  var input = document.getElementById('rev-' + sessionId);
+  if (!input) return;
+  var rawVal = input.value.replace(/[^0-9.]/g, '');
+  var amount = parseFloat(rawVal);
+  if (isNaN(amount) || amount <= 0) {
+    input.style.borderColor = 'var(--red)';
+    setTimeout(function() { input.style.borderColor = 'rgba(255,255,255,0.1)'; }, 1500);
+    return;
+  }
+  var { error } = await sb.from('leads').update({ event_revenue: amount }).eq('session_id', sessionId);
+  if (error) {
+    input.style.borderColor = 'var(--red)';
+    console.error('Save revenue error:', error);
+  } else {
+    input.value = '$' + amount.toLocaleString();
+    input.style.borderColor = 'var(--green)';
+    setTimeout(function() { input.style.borderColor = 'rgba(255,255,255,0.1)'; }, 1500);
+  }
 }
 
 // ============================================
