@@ -118,11 +118,11 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit
   font-size:11px; font-weight:500; color:var(--text-dim);
   text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;
 }
-.metric-value { font-size:32px; font-weight:600; line-height:1; margin-bottom:4px; }
+.metric-value { font-size:32px; font-weight:600; line-height:1; margin-bottom:4px; color:var(--text); }
 .metric-sub { font-size:12px; color:var(--text-secondary); }
-.metric-accent { color:var(--accent); }
-.metric-green { color:var(--green); }
-.metric-amber { color:var(--amber); }
+.label-accent { color:var(--accent); }
+.label-green { color:var(--green); }
+.label-amber { color:var(--amber); }
 
 /* TWO COLUMN LAYOUT */
 .two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
@@ -237,6 +237,19 @@ td.name-cell { color:var(--text); font-weight:500; }
   </div>
 </div>
 
+<!-- PASSWORD RESET PAGE -->
+<div class="login-page" id="reset-page" style="display:none;">
+  <div class="login-box">
+    <div class="login-logo">ZENI</div>
+    <div class="login-sub">Set your new password</div>
+    <input class="login-input" type="password" id="reset-password" placeholder="New password (min 6 characters)">
+    <input class="login-input" type="password" id="reset-confirm" placeholder="Confirm password">
+    <button class="login-btn" id="reset-btn" onclick="handleResetPassword()">Set Password</button>
+    <div class="login-error" id="reset-error"></div>
+    <div id="reset-success" style="display:none;font-size:13px;color:var(--green);margin-top:12px;"></div>
+  </div>
+</div>
+
 <!-- DASHBOARD APP -->
 <div class="app" id="app">
   <div class="sidebar">
@@ -275,10 +288,10 @@ td.name-cell { color:var(--text); font-weight:500; }
 
       <div class="metrics-grid" id="metrics-grid" style="grid-template-columns:repeat(5, 1fr);">
         <div class="metric-card"><div class="metric-label">Total Leads</div><div class="metric-value" id="m-total-leads">—</div><div class="metric-sub">All time</div></div>
-        <div class="metric-card"><div class="metric-label">Tours Booked</div><div class="metric-value metric-accent" id="m-tours-booked">—</div><div class="metric-sub" id="m-lead-to-tour">—</div></div>
-        <div class="metric-card"><div class="metric-label">Events Booked</div><div class="metric-value metric-green" id="m-events-booked">—</div><div class="metric-sub" id="m-conversion-rate">—</div></div>
-        <div class="metric-card"><div class="metric-label">Zeni Revenue</div><div class="metric-value" id="m-revenue" style="color:#10b981;">—</div><div class="metric-sub" id="m-avg-revenue">—</div></div>
-        <div class="metric-card"><div class="metric-label">Follow-up Opt-ins</div><div class="metric-value metric-amber" id="m-optins">—</div><div class="metric-sub" id="m-vendor-optins">—</div></div>
+        <div class="metric-card"><div class="metric-label label-accent">Tours Booked</div><div class="metric-value" id="m-tours-booked">—</div><div class="metric-sub" id="m-lead-to-tour">—</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="m-events-booked">—</div><div class="metric-sub" id="m-conversion-rate">—</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Zeni Revenue</div><div class="metric-value" id="m-revenue">—</div><div class="metric-sub" id="m-avg-revenue">—</div></div>
+        <div class="metric-card"><div class="metric-label label-amber">Follow-up Opt-ins</div><div class="metric-value" id="m-optins">—</div><div class="metric-sub" id="m-vendor-optins">—</div></div>
       </div>
 
       <div class="two-col">
@@ -615,8 +628,8 @@ async function loadFollowups() {
 
   document.getElementById('followup-metrics').innerHTML = stats.map(function(s) {
     return '<div class="metric-card">'
-      + '<div class="metric-label">' + s.label + '</div>'
-      + '<div class="metric-value" style="color:' + s.color + '">' + s.value + '</div>'
+      + '<div class="metric-label" style="color:' + s.color + '">' + s.label + '</div>'
+      + '<div class="metric-value">' + s.value + '</div>'
       + '</div>';
   }).join('');
 }
@@ -646,9 +659,84 @@ async function saveRevenue(sessionId) {
 }
 
 // ============================================
+// PASSWORD RESET HANDLER
+// ============================================
+async function checkForPasswordReset() {
+  // Supabase sends recovery links with hash params
+  var hash = window.location.hash;
+  if (hash && hash.includes('type=recovery')) {
+    // Let Supabase client pick up the session from the URL
+    var { data, error } = await sb.auth.getSession();
+    if (data && data.session) {
+      // User is authenticated via recovery token — show reset form
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('reset-page').style.display = 'flex';
+      return true;
+    }
+  }
+  return false;
+}
+
+async function handleResetPassword() {
+  var pw = document.getElementById('reset-password').value;
+  var confirm = document.getElementById('reset-confirm').value;
+  var btn = document.getElementById('reset-btn');
+  var err = document.getElementById('reset-error');
+  var success = document.getElementById('reset-success');
+
+  err.style.display = 'none';
+  success.style.display = 'none';
+
+  if (!pw || pw.length < 6) {
+    err.textContent = 'Password must be at least 6 characters';
+    err.style.display = 'block';
+    return;
+  }
+  if (pw !== confirm) {
+    err.textContent = 'Passwords do not match';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  var { error } = await sb.auth.updateUser({ password: pw });
+
+  if (error) {
+    err.textContent = error.message;
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Set Password';
+    return;
+  }
+
+  success.textContent = 'Password updated! Redirecting to dashboard...';
+  success.style.display = 'block';
+  btn.style.display = 'none';
+
+  // Clean the URL hash and redirect to dashboard
+  setTimeout(function() {
+    window.location.hash = '';
+    window.location.reload();
+  }, 1500);
+}
+
+// Enter key on confirm field
+document.getElementById('reset-confirm').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') handleResetPassword();
+});
+
+// ============================================
 // INIT
 // ============================================
-checkSession();
+async function init() {
+  var isReset = await checkForPasswordReset();
+  if (!isReset) {
+    await checkSession();
+  }
+}
+init();
 </script>
 </body>
 </html>
