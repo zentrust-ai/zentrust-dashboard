@@ -151,6 +151,15 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit
 .chart-bar-label {
   font-size:9px; color:var(--text-dim); text-align:center; white-space:nowrap;
 }
+.line-chart { position:relative; width:100%; height:100%; }
+.line-chart svg { width:100%; height:100%; }
+.line-chart-tooltip {
+  position:absolute; background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:8px 12px; font-size:12px; pointer-events:none;
+  display:none; z-index:10; white-space:nowrap;
+}
+.line-chart-tooltip .tt-date { color:var(--text-sec); font-size:10px; }
+.line-chart-tooltip .tt-val { color:var(--text); font-weight:600; }
 
 /* FUNNEL */
 .funnel-card {
@@ -293,10 +302,15 @@ td.name-cell { color:var(--text); font-weight:500; }
         <div class="metric-card"><div class="metric-label label-green">Zeni Revenue</div><div class="metric-value" id="m-revenue">—</div><div class="metric-sub" id="m-avg-revenue">—</div></div>
         <div class="metric-card"><div class="metric-label label-amber">Follow-up Opt-ins</div><div class="metric-value" id="m-optins">—</div><div class="metric-sub" id="m-vendor-optins">—</div></div>
       </div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(3, 1fr); margin-bottom:28px;">
+        <div class="metric-card"><div class="metric-label label-accent">Deposits Sent</div><div class="metric-value" id="m-dep-sent">—</div><div class="metric-sub">Invoices sent to leads</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Deposits Collected</div><div class="metric-value" id="m-dep-paid">—</div><div class="metric-sub" id="m-dep-rate">—</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Deposit Revenue</div><div class="metric-value" id="m-dep-amount">—</div><div class="metric-sub">Total collected via Zeni</div></div>
+      </div>
 
       <div class="two-col">
         <div class="chart-card">
-          <div class="chart-title">Leads Over Time <span>Last 30 days</span></div>
+          <div class="chart-title">Conversations Per Day <span>Last 30 days</span></div>
           <div class="chart-area" id="chart-leads"></div>
         </div>
         <div class="funnel-card">
@@ -358,7 +372,7 @@ td.name-cell { color:var(--text); font-weight:500; }
 // SUPABASE CONFIG
 // ============================================
 const SUPABASE_URL = 'https://wjwjylmixdwkxpraykyf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqd2p5bG1peGR3a3hwcmF5a3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzUxNTUsImV4cCI6MjA4ODA1MTE1NX0.fDNNnmqpHijSfKOZqDiIzgR0_3xx7ZiCSc-xVuqOvBg'; // Safe — this is the public key
+const SUPABASE_ANON_KEY = 'YOUR_PUBLISHABLE_KEY_HERE'; // Safe — this is the public key
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
@@ -473,6 +487,9 @@ async function loadOverview() {
       post_tour_emails_sent: metrics.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
       nurture_emails_sent: metrics.reduce((s, v) => s + (v.nurture_emails_sent || 0), 0),
       unsubscribed: metrics.reduce((s, v) => s + (v.unsubscribed || 0), 0),
+      deposits_sent: metrics.reduce((s, v) => s + (v.deposits_sent || 0), 0),
+      deposits_paid: metrics.reduce((s, v) => s + (v.deposits_paid || 0), 0),
+      deposits_collected: metrics.reduce((s, v) => s + (parseFloat(v.deposits_collected) || 0), 0),
     };
     m.lead_to_tour_rate = m.total_leads > 0 ? ((m.tours_booked / m.total_leads) * 100).toFixed(1) : 0;
     m.event_booking_rate = m.tours_booked > 0 ? ((m.events_booked / m.tours_booked) * 100).toFixed(1) : 0;
@@ -494,6 +511,15 @@ async function loadOverview() {
   document.getElementById('m-revenue').textContent = '$' + rev.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
   var avgRev = m.events_booked > 0 ? Math.round(rev / m.events_booked) : 0;
   document.getElementById('m-avg-revenue').textContent = avgRev > 0 ? '$' + avgRev.toLocaleString() + ' avg per event' : 'No events yet';
+
+  // Deposits
+  var depSent = m.deposits_sent || 0;
+  var depPaid = m.deposits_paid || 0;
+  var depAmount = parseFloat(m.deposits_collected) || 0;
+  document.getElementById('m-dep-sent').textContent = depSent;
+  document.getElementById('m-dep-paid').textContent = depPaid;
+  document.getElementById('m-dep-rate').textContent = depSent > 0 ? Math.round((depPaid / depSent) * 100) + '% collection rate' : 'No invoices yet';
+  document.getElementById('m-dep-amount').textContent = '$' + depAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
   // Funnel
   const funnel = [
@@ -527,17 +553,60 @@ async function loadChart() {
     return;
   }
 
-  const maxVal = Math.max(...data.map(d => d.lead_count), 1);
-  const bars = data.map(function(d) {
-    const h = Math.max((d.lead_count / maxVal) * 160, 2);
-    const dateLabel = new Date(d.lead_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return '<div class="chart-bar-wrapper">'
-      + '<div class="chart-bar" style="height:' + h + 'px;" title="' + dateLabel + ': ' + d.lead_count + ' leads"></div>'
-      + '<div class="chart-bar-label">' + dateLabel + '</div>'
-      + '</div>';
+  // Build line chart with SVG
+  var W = 680, H = 180, padL = 36, padR = 16, padT = 16, padB = 32;
+  var maxVal = Math.max(...data.map(function(d) { return d.lead_count; }), 1);
+  var plotW = W - padL - padR;
+  var plotH = H - padT - padB;
+  var step = data.length > 1 ? plotW / (data.length - 1) : plotW;
+
+  // Build points
+  var points = data.map(function(d, i) {
+    var x = padL + (data.length > 1 ? i * step : plotW / 2);
+    var y = padT + plotH - (d.lead_count / maxVal) * plotH;
+    return { x: x, y: y, count: d.lead_count, date: d.lead_date };
+  });
+
+  // SVG path
+  var linePath = points.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+  var areaPath = linePath + ' L' + points[points.length - 1].x.toFixed(1) + ',' + (padT + plotH) + ' L' + points[0].x.toFixed(1) + ',' + (padT + plotH) + ' Z';
+
+  // Y-axis labels
+  var yLabels = '';
+  for (var yi = 0; yi <= 4; yi++) {
+    var yVal = Math.round(maxVal * (yi / 4));
+    var yPos = padT + plotH - (yi / 4) * plotH;
+    yLabels += '<text x="' + (padL - 8) + '" y="' + (yPos + 3) + '" text-anchor="end" fill="rgba(255,255,255,0.2)" font-size="9">' + yVal + '</text>';
+    yLabels += '<line x1="' + padL + '" y1="' + yPos + '" x2="' + (W - padR) + '" y2="' + yPos + '" stroke="rgba(255,255,255,0.04)"/>';
+  }
+
+  // X-axis labels (show ~6 evenly spaced)
+  var xLabels = '';
+  var labelStep = Math.max(1, Math.floor(data.length / 6));
+  for (var xi = 0; xi < data.length; xi += labelStep) {
+    var lbl = new Date(data[xi].lead_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    xLabels += '<text x="' + points[xi].x + '" y="' + (H - 6) + '" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="9">' + lbl + '</text>';
+  }
+
+  // Dots
+  var dots = points.map(function(p) {
+    var lbl = new Date(p.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="var(--accent)" stroke="var(--card)" stroke-width="2">'
+      + '<title>' + lbl + ': ' + p.count + ' conversations</title></circle>';
   }).join('');
 
-  chartEl.innerHTML = '<div class="chart-bar-container">' + bars + '</div>';
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;font-family:Outfit,sans-serif;">'
+    + yLabels + xLabels
+    + '<defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/>'
+    + '<stop offset="100%" stop-color="var(--accent)" stop-opacity="0.01"/>'
+    + '</linearGradient></defs>'
+    + '<path d="' + areaPath + '" fill="url(#areaFill)"/>'
+    + '<path d="' + linePath + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    + dots
+    + '</svg>';
+
+  chartEl.innerHTML = '<div class="line-chart">' + svg + '</div>';
 }
 
 // ============================================
@@ -569,13 +638,15 @@ async function loadLeads() {
 
     let revenueCell = '';
     if (l.event_booked) {
-      var savedRev = l.event_revenue ? '$' + parseFloat(l.event_revenue).toLocaleString() : '';
+      var savedRev = l.event_revenue ? '$' + parseFloat(l.event_revenue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
       revenueCell = '<td>'
         + '<div style="display:flex;align-items:center;gap:6px;">'
         + '<input type="text" id="rev-' + l.session_id + '" placeholder="Estimated Final Price" '
         + 'value="' + savedRev + '" '
         + 'style="width:130px;padding:6px 10px;background:' + 'rgba(255,255,255,0.04)' + ';border:1px solid rgba(255,255,255,0.1);border-radius:6px;'
         + 'font-size:12px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none;" '
+        + 'onfocus="if(this.value.startsWith(\'$\'))this.value=this.value.replace(/[$,]/g,\'\')" '
+        + 'onblur="formatRevInput(this)" '
         + 'onkeypress="if(event.key===\'Enter\')saveRevenue(\'' + l.session_id + '\')">'
         + '<button onclick="saveRevenue(\'' + l.session_id + '\')" '
         + 'style="padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;'
@@ -632,6 +703,19 @@ async function loadFollowups() {
       + '<div class="metric-value">' + s.value + '</div>'
       + '</div>';
   }).join('');
+}
+
+// ============================================
+// REVENUE INPUT FORMATTING
+// ============================================
+function formatRevInput(input) {
+  var raw = input.value.replace(/[^0-9.]/g, '');
+  var num = parseFloat(raw);
+  if (!isNaN(num) && num > 0) {
+    input.value = '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  } else if (raw === '') {
+    input.value = '';
+  }
 }
 
 // ============================================
