@@ -3,824 +3,720 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zentrust Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Zeni — AI Venue Concierge by Zentrust</title>
+<meta name="description" content="Zeni is an AI concierge that lives on your venue website. She answers questions, qualifies leads, and books tours 24/7.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 :root {
-  --bg: #0d1117;
-  --surface: #131b2e;
-  --card: #1a2236;
-  --border: rgba(255,255,255,0.06);
-  --accent: #3a9fb0;
-  --accent-soft: rgba(58,159,176,0.12);
-  --green: #4ade80;
-  --green-soft: rgba(74,222,128,0.12);
-  --amber: #f59e0b;
-  --amber-soft: rgba(245,158,11,0.12);
-  --red: #ef4444;
-  --red-soft: rgba(239,68,68,0.12);
-  --blue: #3b82f6;
-  --blue-soft: rgba(59,130,246,0.12);
-  --text: rgba(255,255,255,0.9);
-  --text-secondary: rgba(255,255,255,0.5);
-  --text-dim: rgba(255,255,255,0.25);
-  --font: 'Outfit', -apple-system, sans-serif;
-}
-html, body { height:100%; }
-body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
-
-/* LOGIN */
-.login-page {
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
-  background:var(--bg);
-}
-.login-box {
-  width:380px; background:var(--surface); border:1px solid var(--border);
-  border-radius:16px; padding:40px 36px; text-align:center;
-}
-.login-logo { font-size:28px; font-weight:700; margin-bottom:6px; color:#fff; letter-spacing:1.5px; }
-.login-sub { font-size:13px; color:var(--text-secondary); margin-bottom:32px; }
-.login-input {
-  width:100%; padding:13px 16px; background:rgba(255,255,255,0.04);
-  border:1px solid var(--border); border-radius:10px; font-family:var(--font);
-  font-size:14px; color:var(--text); outline:none; transition:border-color 0.2s;
-  margin-bottom:12px;
-}
-.login-input:focus { border-color:var(--accent); }
-.login-input::placeholder { color:var(--text-dim); }
-.login-btn {
-  width:100%; padding:14px; background:var(--accent); color:#fff; border:none;
-  border-radius:10px; font-family:var(--font); font-size:14px; font-weight:600;
-  cursor:pointer; margin-top:8px; transition:background 0.2s;
-}
-.login-btn:hover { background:#4dbbc9; color:#0d1117; }
-.login-btn:disabled { background:rgba(255,255,255,0.06); color:var(--text-dim); cursor:wait; }
-.login-error { font-size:12px; color:var(--red); margin-top:12px; display:none; }
-
-/* LAYOUT */
-.app { display:none; min-height:100vh; }
-.sidebar {
-  position:fixed; top:0; left:0; bottom:0; width:220px;
-  background:var(--surface); border-right:1px solid var(--border);
-  display:flex; flex-direction:column; padding:24px 0; z-index:10;
-}
-.sidebar-logo {
-  font-size:20px; font-weight:700; padding:0 24px; margin-bottom:32px;
-  color:#fff; letter-spacing:1.5px;
-}
-.sidebar-nav { display:flex; flex-direction:column; gap:2px; padding:0 12px; flex:1; }
-.sidebar-link {
-  display:flex; align-items:center; gap:10px; padding:10px 12px;
-  border-radius:8px; font-size:13px; font-weight:500; color:var(--text-secondary);
-  cursor:pointer; transition:all 0.15s; text-decoration:none; border:none; background:none;
-  font-family:var(--font); width:100%; text-align:left;
-}
-.sidebar-link:hover { background:rgba(255,255,255,0.04); color:var(--text); }
-.sidebar-link.active { background:var(--accent-soft); color:var(--accent); }
-.sidebar-link svg { width:18px; height:18px; opacity:0.6; }
-.sidebar-bottom {
-  padding:16px 24px; border-top:1px solid var(--border);
-  display:flex; flex-direction:column; gap:8px;
-}
-.sidebar-user { font-size:12px; color:var(--text-secondary); }
-.sidebar-role { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; }
-.logout-btn {
-  background:none; border:1px solid var(--border); color:var(--text-secondary);
-  padding:8px; border-radius:6px; font-size:11px; font-family:var(--font);
-  cursor:pointer; transition:all 0.15s; text-transform:uppercase; letter-spacing:0.5px;
-}
-.logout-btn:hover { border-color:var(--red); color:var(--red); }
-
-.main { margin-left:220px; padding:32px; }
-.page-header {
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:28px;
-}
-.page-title { font-size:22px; font-weight:600; }
-.page-venue { font-size:13px; color:var(--text-secondary); margin-top:4px; }
-.header-badge {
-  font-size:11px; font-weight:500; padding:6px 14px; border-radius:6px;
-  background:var(--green-soft); color:var(--green); text-transform:uppercase; letter-spacing:0.5px;
+  --teal: #3a9fb0;
+  --teal-hover: #4dbbc9;
+  --teal-glow: rgba(58, 159, 176, 0.15);
+  --teal-soft: rgba(58, 159, 176, 0.08);
+  --dark: #0a0e14;
+  --dark-surface: #111821;
+  --dark-card: #151d29;
+  --dark-border: rgba(255,255,255,0.06);
+  --light: #f8f9fa;
+  --light-surface: #ffffff;
+  --light-muted: #6b7280;
+  --light-border: rgba(0,0,0,0.06);
+  --text-white: #f0f2f5;
+  --text-dim: #8b95a5;
+  --text-dark: #1a1a2e;
+  --text-dark-muted: #555b6e;
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
 }
 
-/* METRIC CARDS */
-.metrics-grid {
-  display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:28px;
-}
-.metric-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  padding:22px 20px; transition:all 0.2s;
-}
-.metric-card:hover { border-color:rgba(255,255,255,0.1); }
-.metric-label {
-  font-size:11px; font-weight:500; color:var(--text-dim);
-  text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;
-}
-.metric-value { font-size:32px; font-weight:600; line-height:1; margin-bottom:4px; color:var(--text); }
-.metric-sub { font-size:12px; color:var(--text-secondary); }
-.label-accent { color:var(--accent); }
-.label-green { color:var(--green); }
-.label-amber { color:var(--amber); }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* TWO COLUMN LAYOUT */
-.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+html { scroll-behavior: smooth; }
 
-/* CHART AREA */
-.chart-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  padding:24px; min-height:280px;
-}
-.chart-title {
-  font-size:14px; font-weight:600; margin-bottom:16px;
-  display:flex; justify-content:space-between; align-items:center;
-}
-.chart-title span { font-size:11px; color:var(--text-dim); font-weight:400; }
-.chart-area { position:relative; height:200px; }
-.chart-bar-container {
-  display:flex; align-items:flex-end; gap:4px; height:100%;
-  padding-bottom:24px; position:relative;
-}
-.chart-bar-wrapper { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
-.chart-bar {
-  width:100%; min-height:2px; border-radius:4px 4px 0 0;
-  background:var(--accent); opacity:0.8; transition:all 0.3s;
-}
-.chart-bar:hover { opacity:1; }
-.chart-bar-label {
-  font-size:9px; color:var(--text-dim); text-align:center; white-space:nowrap;
-}
-.line-chart { position:relative; width:100%; height:100%; }
-.line-chart svg { width:100%; height:100%; }
-.line-chart-tooltip {
-  position:absolute; background:var(--surface); border:1px solid var(--border);
-  border-radius:8px; padding:8px 12px; font-size:12px; pointer-events:none;
-  display:none; z-index:10; white-space:nowrap;
-}
-.line-chart-tooltip .tt-date { color:var(--text-sec); font-size:10px; }
-.line-chart-tooltip .tt-val { color:var(--text); font-weight:600; }
-
-/* FUNNEL */
-.funnel-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  padding:24px;
-}
-.funnel-title { font-size:14px; font-weight:600; margin-bottom:20px; }
-.funnel-step {
-  display:flex; align-items:center; gap:14px; padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-.funnel-step:last-child { border-bottom:none; }
-.funnel-dot {
-  width:10px; height:10px; border-radius:50%; flex-shrink:0;
-}
-.funnel-step-label { flex:1; font-size:13px; color:var(--text-secondary); }
-.funnel-step-value { font-size:15px; font-weight:600; }
-.funnel-step-pct { font-size:11px; color:var(--text-dim); margin-left:6px; }
-
-/* LEADS TABLE */
-.table-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  overflow:hidden;
-}
-.table-header {
-  padding:18px 24px; display:flex; justify-content:space-between; align-items:center;
-  border-bottom:1px solid var(--border);
-}
-.table-header h3 { font-size:14px; font-weight:600; }
-.table-count { font-size:12px; color:var(--text-dim); }
-table {
-  width:100%; border-collapse:collapse; font-size:13px;
-}
-th {
-  text-align:left; padding:10px 16px; font-size:10px; font-weight:600;
-  text-transform:uppercase; letter-spacing:1px; color:var(--text-dim);
-  background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);
-}
-td {
-  padding:12px 16px; border-bottom:1px solid var(--border);
-  color:var(--text-secondary);
-}
-tr:hover td { background:rgba(255,255,255,0.02); }
-.badge {
-  display:inline-block; padding:3px 10px; border-radius:20px;
-  font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;
-}
-.badge-green { background:var(--green-soft); color:var(--green); }
-.badge-amber { background:var(--amber-soft); color:var(--amber); }
-.badge-red { background:var(--red-soft); color:var(--red); }
-.badge-blue { background:var(--blue-soft); color:var(--blue); }
-.badge-dim { background:rgba(255,255,255,0.04); color:var(--text-dim); }
-td.name-cell { color:var(--text); font-weight:500; }
-
-/* LOADING */
-.loading {
-  display:flex; align-items:center; justify-content:center;
-  min-height:200px; color:var(--text-dim); font-size:14px;
+body {
+  font-family: var(--font-body);
+  color: var(--text-white);
+  background: var(--dark);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* RESPONSIVE */
-@media (max-width:1024px) {
-  .metrics-grid { grid-template-columns:repeat(2, 1fr); }
-  .two-col { grid-template-columns:1fr; }
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1.25rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10, 14, 20, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--dark-border);
+  transition: background 0.3s;
 }
-@media (max-width:768px) {
-  .sidebar { display:none; }
-  .main { margin-left:0; padding:20px; }
-  .metrics-grid { grid-template-columns:1fr 1fr; }
+.nav-logo {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: none;
+}
+.nav-links { display: flex; gap: 2.5rem; align-items: center; }
+.nav-links a {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.25s;
+}
+.nav-links a:hover { color: #fff; }
+.nav-cta {
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  color: var(--dark) !important;
+  background: var(--teal);
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
+  transition: background 0.25s, transform 0.2s !important;
+}
+.nav-cta:hover { background: var(--teal-hover) !important; transform: translateY(-1px); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 8rem 2rem 6rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(58, 159, 176, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+  border: 1px solid rgba(58, 159, 176, 0.25);
+  padding: 0.5rem 1.25rem;
+  border-radius: 100px;
+  margin-bottom: 2.5rem;
+  animation: fadeUp 0.8s ease both;
+}
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--teal);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #fff;
+  max-width: 800px;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.8s ease 0.1s both;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--teal);
+}
+.hero p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text-dim);
+  max-width: 520px;
+  margin-bottom: 2.5rem;
+  animation: fadeUp 0.8s ease 0.2s both;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--dark);
+  background: var(--teal);
+  padding: 1rem 2.25rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none; cursor: pointer;
+  transition: all 0.3s;
+  animation: fadeUp 0.8s ease 0.3s both;
+}
+.hero-cta:hover { background: var(--teal-hover); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(58, 159, 176, 0.25); }
+.hero-cta svg { width: 16px; height: 16px; transition: transform 0.25s; }
+.hero-cta:hover svg { transform: translateX(3px); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STATS STRIP ── */
+.stats-strip {
+  display: flex; justify-content: center; gap: 1px;
+  background: var(--dark-border);
+  border-top: 1px solid var(--dark-border);
+  border-bottom: 1px solid var(--dark-border);
+}
+.stat-item {
+  flex: 1; max-width: 260px;
+  text-align: center;
+  padding: 2.5rem 2rem;
+  background: var(--dark);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: #fff;
+  margin-bottom: 0.35rem;
+}
+.stat-label {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── SECTIONS SHARED ── */
+section { padding: 7rem 2rem; }
+.section-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 1rem;
+}
+.section-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 1.25rem;
+}
+.section-sub {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-dim);
+  max-width: 540px;
+}
+
+/* ── FEATURES (dark) ── */
+.features { background: var(--dark); }
+.features-inner {
+  max-width: 1100px; margin: 0 auto;
+}
+.features-header { text-align: center; margin-bottom: 4rem; }
+.features-header .section-sub { margin: 0 auto; }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--dark-border);
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.feature-card {
+  background: var(--dark-surface);
+  padding: 2.5rem;
+  transition: background 0.3s;
+}
+.feature-card:hover { background: var(--dark-card); }
+.feature-icon {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--teal-soft);
+  border: 1px solid rgba(58, 159, 176, 0.15);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  color: var(--teal);
+}
+.feature-card h3 {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.6rem;
+}
+.feature-card p {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+/* ── SPLIT SECTIONS ── */
+.split {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 5rem; align-items: center;
+}
+.split.reverse { direction: rtl; }
+.split.reverse > * { direction: ltr; }
+.split-visual {
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Lead capture section — light */
+.lead-section { background: var(--light); color: var(--text-dark); }
+.lead-section .section-sub { color: var(--text-dark-muted); }
+.feature-list { list-style: none; margin-top: 1.5rem; }
+.feature-list li {
+  padding: 0.6rem 0;
+  font-size: 0.95rem;
+  color: var(--text-dark-muted);
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.feature-list li::before {
+  content: '';
+  width: 20px; height: 20px; flex-shrink: 0;
+  background: var(--teal);
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.dark-list li { color: var(--text-dim); }
+
+/* Lead visual — stat boxes */
+.lead-stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--light-border);
+  border: 1px solid var(--light-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.lead-stat {
+  background: #fff;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+.lead-stat .val {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--text-dark);
+}
+.lead-stat .label {
+  font-size: 0.78rem;
+  color: var(--text-dark-muted);
+  margin-top: 0.3rem;
+  letter-spacing: 0.02em;
+}
+
+/* Tour booking section — dark */
+.booking-section { background: var(--dark-surface); }
+
+/* Steps visual */
+.steps-visual {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.step-row {
+  display: flex; align-items: center; gap: 1.25rem;
+  padding: 1.4rem 1.5rem;
+  border-bottom: 1px solid var(--dark-border);
+  background: var(--dark-card);
+  transition: background 0.25s;
+}
+.step-row:last-child { border-bottom: none; }
+.step-row:hover { background: rgba(58, 159, 176, 0.04); }
+.step-num {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--teal);
+  border: 1px solid rgba(58, 159, 176, 0.25);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.step-text { font-size: 0.92rem; color: var(--text-dim); }
+.step-text strong { color: #fff; font-weight: 500; }
+
+/* ── HOW IT WORKS ── */
+.how-section { background: var(--dark); }
+.how-inner { max-width: 1100px; margin: 0 auto; }
+.how-header { text-align: center; margin-bottom: 4rem; }
+.how-header .section-sub { margin: 0 auto; }
+.how-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+.how-card {
+  padding: 2.5rem;
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  background: var(--dark-surface);
+  transition: border-color 0.3s, transform 0.3s;
+}
+.how-card:hover { border-color: rgba(58, 159, 176, 0.2); transform: translateY(-4px); }
+.how-num {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: rgba(58, 159, 176, 0.2);
+  line-height: 1;
+  margin-bottom: 1.5rem;
+}
+.how-card h3 {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.6rem;
+}
+.how-card p {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+/* ── CTA ── */
+.cta-section {
+  background: var(--dark-surface);
+  text-align: center;
+  padding: 7rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute; bottom: -200px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(58, 159, 176, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-section .section-heading {
+  color: #fff;
+  max-width: 500px;
+  margin: 0 auto 1rem;
+}
+.cta-section .section-sub {
+  margin: 0 auto 2.5rem;
+}
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--dark);
+  background: var(--teal);
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.cta-btn:hover { background: var(--teal-hover); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(58, 159, 176, 0.25); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid var(--dark-border);
+  background: var(--dark);
+}
+.footer-left {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.25s;
+}
+.footer-links a:hover { color: #fff; }
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── MOBILE NAV ── */
+.nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 0.5rem; }
+.nav-toggle span {
+  display: block; width: 22px; height: 2px; background: #fff; margin: 5px 0;
+  transition: all 0.3s;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-toggle { display: block; }
+  .nav-links.open {
+    display: flex; flex-direction: column;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: rgba(10, 14, 20, 0.97);
+    backdrop-filter: blur(20px);
+    padding: 1.5rem 2rem;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--dark-border);
+  }
+  .features-grid { grid-template-columns: 1fr; }
+  .split { grid-template-columns: 1fr; gap: 2.5rem; }
+  .split.reverse { direction: ltr; }
+  .how-grid { grid-template-columns: 1fr; }
+  .stats-strip { flex-wrap: wrap; }
+  .stat-item { min-width: 50%; }
+  footer { flex-direction: column; gap: 1rem; text-align: center; }
+}
+@media (max-width: 600px) {
+  .hero h1 { font-size: 2.2rem; }
+  section { padding: 4.5rem 1.25rem; }
+  .stat-item { min-width: 100%; }
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
-<div class="login-page" id="login-page">
-  <div class="login-box">
-    <div class="login-logo">ZENI</div>
-    <div class="login-sub">Dashboard — Powered by Zentrust</div>
-    <input class="login-input" type="email" id="login-email" placeholder="Email address">
-    <input class="login-input" type="password" id="login-password" placeholder="Password">
-    <button class="login-btn" id="login-btn" onclick="handleLogin()">Sign In</button>
-    <div class="login-error" id="login-error"></div>
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Zeni</a>
+  <div class="nav-links" id="navLinks">
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="#cta" class="nav-cta">Request Demo</a>
+  </div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">AI-Powered Venue Concierge</div>
+  <h1>Capture every lead.<br><em>Book every tour.</em></h1>
+  <p>Zeni is an AI concierge that lives on your venue website — answering questions, qualifying leads, and booking tours around the clock.</p>
+  <a href="#cta" class="hero-cta">
+    Request a Demo
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+  </a>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-value">24/7</div>
+    <div class="stat-label">Availability</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">&lt;3s</div>
+    <div class="stat-label">Response Time</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">100%</div>
+    <div class="stat-label">Leads Captured</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">0</div>
+    <div class="stat-label">Passwords Needed</div>
   </div>
 </div>
 
-<!-- PASSWORD RESET PAGE -->
-<div class="login-page" id="reset-page" style="display:none;">
-  <div class="login-box">
-    <div class="login-logo">ZENI</div>
-    <div class="login-sub">Set your new password</div>
-    <input class="login-input" type="password" id="reset-password" placeholder="New password (min 6 characters)">
-    <input class="login-input" type="password" id="reset-confirm" placeholder="Confirm password">
-    <button class="login-btn" id="reset-btn" onclick="handleResetPassword()">Set Password</button>
-    <div class="login-error" id="reset-error"></div>
-    <div id="reset-success" style="display:none;font-size:13px;color:var(--green);margin-top:12px;"></div>
-  </div>
-</div>
-
-<!-- DASHBOARD APP -->
-<div class="app" id="app">
-  <div class="sidebar">
-    <div class="sidebar-logo">ZENI</div>
-    <div class="sidebar-nav">
-      <button class="sidebar-link active" data-page="overview" onclick="showPage('overview',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Overview
-      </button>
-      <button class="sidebar-link" data-page="leads" onclick="showPage('leads',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Leads
-      </button>
-      <button class="sidebar-link" data-page="followups" onclick="showPage('followups',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Follow-ups
-      </button>
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="features-inner">
+    <div class="features-header reveal">
+      <div class="section-tag">What Zeni Does</div>
+      <h2 class="section-heading" style="color:#fff;">Your front desk,<br>running on autopilot</h2>
+      <p class="section-sub">From first message to booked tour — Zeni handles the entire journey so your staff doesn't have to.</p>
     </div>
-    <div class="sidebar-bottom">
-      <div class="sidebar-user" id="user-email">—</div>
-      <div class="sidebar-role" id="user-role">—</div>
-      <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>AI Chat Widget</h3>
+        <p>Answers venue questions and qualifies leads through natural conversation. Always on, always consistent.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3>Tour Booking</h3>
+        <p>Checks your calendar, shows open slots, books tours, and sends confirmation emails — zero staff involvement.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h3>Auto Follow-ups</h3>
+        <p>9-step nurture sequence — reminders, thank-yous, re-engagement — all running on autopilot.</p>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="main">
-    <!-- OVERVIEW PAGE -->
-    <div id="page-overview">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Overview</div>
-          <div class="page-venue" id="venue-name">Loading...</div>
-        </div>
-        <div class="header-badge" id="status-badge">Live</div>
-      </div>
-
-      <div class="metrics-grid" id="metrics-grid" style="grid-template-columns:repeat(5, 1fr);">
-        <div class="metric-card"><div class="metric-label">Total Leads</div><div class="metric-value" id="m-total-leads">—</div><div class="metric-sub">All time</div></div>
-        <div class="metric-card"><div class="metric-label label-accent">Tours Booked</div><div class="metric-value" id="m-tours-booked">—</div><div class="metric-sub" id="m-lead-to-tour">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="m-events-booked">—</div><div class="metric-sub" id="m-conversion-rate">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Zeni Revenue</div><div class="metric-value" id="m-revenue">—</div><div class="metric-sub" id="m-avg-revenue">—</div></div>
-        <div class="metric-card"><div class="metric-label label-amber">Follow-up Opt-ins</div><div class="metric-value" id="m-optins">—</div><div class="metric-sub" id="m-vendor-optins">—</div></div>
-      </div>
-      <div class="metrics-grid" style="grid-template-columns:repeat(3, 1fr); margin-bottom:28px;">
-        <div class="metric-card"><div class="metric-label label-accent">Deposits Sent</div><div class="metric-value" id="m-dep-sent">—</div><div class="metric-sub">Invoices sent to leads</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Deposits Collected</div><div class="metric-value" id="m-dep-paid">—</div><div class="metric-sub" id="m-dep-rate">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Deposit Revenue</div><div class="metric-value" id="m-dep-amount">—</div><div class="metric-sub">Total collected via Zeni</div></div>
-      </div>
-
-      <div class="two-col">
-        <div class="chart-card">
-          <div class="chart-title">Conversations Per Day <span>Last 30 days</span></div>
-          <div class="chart-area" id="chart-leads"></div>
-        </div>
-        <div class="funnel-card">
-          <div class="funnel-title">Conversion Funnel</div>
-          <div id="funnel-steps"></div>
-        </div>
-      </div>
+<!-- LEAD CAPTURE (light) -->
+<section class="lead-section">
+  <div class="split reveal">
+    <div>
+      <div class="section-tag">Lead Capture</div>
+      <h2 class="section-heading" style="color:var(--text-dark);">Never miss another inquiry</h2>
+      <p class="section-sub">Zeni collects name, email, phone, event date, and guest count through natural conversation. Leads land in your inbox fully qualified.</p>
+      <ul class="feature-list">
+        <li>Conversational lead qualification</li>
+        <li>Real-time staff email notifications</li>
+        <li>Lead scoring and status tracking</li>
+      </ul>
     </div>
-
-    <!-- LEADS PAGE -->
-    <div id="page-leads" style="display:none;">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Leads</div>
-          <div class="page-venue">All captured leads</div>
-        </div>
+    <div class="lead-stats-grid">
+      <div class="lead-stat">
+        <div class="val">67%</div>
+        <div class="label">of inquiries happen after hours</div>
       </div>
-      <div class="table-card">
-        <div class="table-header">
-          <h3>Recent Leads</h3>
-          <div class="table-count" id="leads-count">—</div>
-        </div>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Event Date</th>
-                <th>Guests</th>
-                <th>Tour</th>
-                <th>Status</th>
-                <th>Revenue</th>
-                <th>Created</th>
-              </tr>
-            </thead>
-            <tbody id="leads-tbody"></tbody>
-          </table>
-        </div>
+      <div class="lead-stat">
+        <div class="val">5</div>
+        <div class="label">fields auto-collected per lead</div>
       </div>
-    </div>
-
-    <!-- FOLLOW-UPS PAGE -->
-    <div id="page-followups" style="display:none;">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Follow-up Stats</div>
-          <div class="page-venue">Email automation performance</div>
-        </div>
+      <div class="lead-stat">
+        <div class="val">0</div>
+        <div class="label">forms for couples to fill</div>
       </div>
-      <div class="metrics-grid" id="followup-metrics"></div>
+      <div class="lead-stat">
+        <div class="val">9</div>
+        <div class="label">automated follow-up emails</div>
+      </div>
     </div>
   </div>
-</div>
+</section>
+
+<!-- TOUR BOOKING (dark) -->
+<section class="booking-section">
+  <div class="split reverse reveal">
+    <div>
+      <div class="section-tag">Tour Booking</div>
+      <h2 class="section-heading" style="color:#fff;">Inquiry to booked tour in&nbsp;one conversation</h2>
+      <p class="section-sub">Zeni checks your Google Calendar, shows available slots, books the tour, and sends confirmation emails — all automatically.</p>
+      <ul class="feature-list dark-list" style="margin-top:1.5rem;">
+        <li>Google Calendar integration</li>
+        <li>Automatic confirmation emails</li>
+        <li>Staff notified on every booking</li>
+      </ul>
+    </div>
+    <div class="steps-visual">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Couple asks about tours</strong> — Zeni qualifies them first</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Shows available dates</strong> — pulled live from your calendar</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Books the tour</strong> — calendar event + confirmation email sent</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Follows up automatically</strong> — reminders, thank-yous, re-engagement</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="how-inner">
+    <div class="how-header reveal">
+      <div class="section-tag">How It Works</div>
+      <h2 class="section-heading" style="color:#fff;">Live on your website<br>by tomorrow</h2>
+      <p class="section-sub">One script tag. No passwords, no IT department, no contracts.</p>
+    </div>
+    <div class="how-grid reveal">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <h3>We set it up</h3>
+        <p>One script tag on your site. We handle everything — configuration, knowledge base, branding. You don't touch a thing.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <h3>Zeni talks to couples</h3>
+        <p>24/7 on your website. Qualifies leads, answers venue questions, and books tours through natural conversation.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <h3>You get booked tours</h3>
+        <p>Qualified leads in your inbox. Tours on your calendar. Follow-ups running on autopilot. You just show up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="section-tag reveal">Get Started</div>
+  <h2 class="section-heading reveal">Ready to never miss<br>a lead again?</h2>
+  <p class="section-sub reveal">Get Zeni on your website in 24 hours. No setup required on your end.</p>
+  <a href="mailto:raul.paulajr@zentrust.net?subject=Zeni%20Demo%20Request" class="cta-btn reveal">Request a Demo</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">Zeni — Powered by Zentrust &copy; 2026</div>
+  <div class="footer-links">
+    <a href="https://zentrust.net/terms.html">Terms</a>
+    <a href="https://zentrust.net/privacy.html">Privacy</a>
+  </div>
+</footer>
 
 <script>
-// ============================================
-// SUPABASE CONFIG
-// ============================================
-const SUPABASE_URL = 'https://wjwjylmixdwkxpraykyf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqd2p5bG1peGR3a3hwcmF5a3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzUxNTUsImV4cCI6MjA4ODA1MTE1NX0.fDNNnmqpHijSfKOZqDiIzgR0_3xx7ZiCSc-xVuqOvBg'; // Safe — this is the public key
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-let currentUser = null;
-let userRole = null;
-let userVenueId = null;
-
-// ============================================
-// AUTH
-// ============================================
-async function checkSession() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadUserRole();
-    showApp();
-  }
-}
-
-async function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-error');
-
-  if (!email || !password) { err.textContent = 'Please enter email and password'; err.style.display = 'block'; return; }
-
-  btn.disabled = true; btn.textContent = 'Signing in...';
-  err.style.display = 'none';
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    err.textContent = error.message; err.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Sign In';
-    return;
-  }
-
-  currentUser = data.user;
-  await loadUserRole();
-  showApp();
-}
-
-async function handleLogout() {
-  await sb.auth.signOut();
-  currentUser = null; userRole = null; userVenueId = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-page').style.display = 'flex';
-}
-
-async function loadUserRole() {
-  const { data } = await sb.rpc('get_user_role');
-  userRole = data || 'venue_staff';
-
-  const { data: vid } = await sb.rpc('get_user_venue_id');
-  userVenueId = vid || null;
-
-  document.getElementById('user-email').textContent = currentUser.email;
-  document.getElementById('user-role').textContent = userRole === 'admin' ? 'Administrator' : 'Venue Staff';
-}
-
-function showApp() {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  loadOverview();
-}
-
-// Enter key on password field
-document.getElementById('login-password').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') handleLogin();
+// Mobile nav toggle
+document.getElementById('navToggle').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
 });
 
-// ============================================
-// PAGE NAVIGATION
-// ============================================
-function showPage(page, el) {
-  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-  if (el) el.classList.add('active');
-  document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
-  document.getElementById('page-' + page).style.display = 'block';
-
-  if (page === 'overview') loadOverview();
-  else if (page === 'leads') loadLeads();
-  else if (page === 'followups') loadFollowups();
-}
-
-// ============================================
-// OVERVIEW
-// ============================================
-async function loadOverview() {
-  const { data: metrics, error } = await sb.from('dashboard_metrics').select('*');
-
-  if (error || !metrics || metrics.length === 0) {
-    document.getElementById('venue-name').textContent = 'No data available';
-    return;
-  }
-
-  // If admin, aggregate all venues. If venue_staff, show their venue.
-  let m;
-  if (userRole === 'admin' && metrics.length > 1) {
-    m = {
-      venue_name: 'All Venues (' + metrics.length + ')',
-      total_leads: metrics.reduce((s, v) => s + (v.total_leads || 0), 0),
-      tours_booked: metrics.reduce((s, v) => s + (v.tours_booked || 0), 0),
-      events_booked: metrics.reduce((s, v) => s + (v.events_booked || 0), 0),
-      tours_attended: metrics.reduce((s, v) => s + (v.tours_attended || 0), 0),
-      tours_no_show: metrics.reduce((s, v) => s + (v.tours_no_show || 0), 0),
-      followup_optins: metrics.reduce((s, v) => s + (v.followup_optins || 0), 0),
-      vendor_optins: metrics.reduce((s, v) => s + (v.vendor_optins || 0), 0),
-      total_revenue: metrics.reduce((s, v) => s + (parseFloat(v.total_revenue) || 0), 0),
-      reminders_sent: metrics.reduce((s, v) => s + (v.reminders_sent || 0), 0),
-      attendance_checks_sent: metrics.reduce((s, v) => s + (v.attendance_checks_sent || 0), 0),
-      post_tour_emails_sent: metrics.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
-      nurture_emails_sent: metrics.reduce((s, v) => s + (v.nurture_emails_sent || 0), 0),
-      unsubscribed: metrics.reduce((s, v) => s + (v.unsubscribed || 0), 0),
-      deposits_sent: metrics.reduce((s, v) => s + (v.deposits_sent || 0), 0),
-      deposits_paid: metrics.reduce((s, v) => s + (v.deposits_paid || 0), 0),
-      deposits_collected: metrics.reduce((s, v) => s + (parseFloat(v.deposits_collected) || 0), 0),
-    };
-    m.lead_to_tour_rate = m.total_leads > 0 ? ((m.tours_booked / m.total_leads) * 100).toFixed(1) : 0;
-    m.event_booking_rate = m.tours_booked > 0 ? ((m.events_booked / m.tours_booked) * 100).toFixed(1) : 0;
-  } else {
-    m = metrics[0];
-  }
-
-  document.getElementById('venue-name').textContent = m.venue_name;
-  document.getElementById('m-total-leads').textContent = m.total_leads;
-  document.getElementById('m-tours-booked').textContent = m.tours_booked;
-  document.getElementById('m-lead-to-tour').textContent = m.lead_to_tour_rate + '% lead → tour';
-  document.getElementById('m-events-booked').textContent = m.events_booked;
-  document.getElementById('m-conversion-rate').textContent = m.event_booking_rate + '% tour → event';
-  document.getElementById('m-optins').textContent = m.followup_optins;
-  document.getElementById('m-vendor-optins').textContent = m.vendor_optins + ' vendor opt-ins';
-
-  // Revenue
-  var rev = parseFloat(m.total_revenue) || 0;
-  document.getElementById('m-revenue').textContent = '$' + rev.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-  var avgRev = m.events_booked > 0 ? Math.round(rev / m.events_booked) : 0;
-  document.getElementById('m-avg-revenue').textContent = avgRev > 0 ? '$' + avgRev.toLocaleString() + ' avg per event' : 'No events yet';
-
-  // Deposits
-  var depSent = m.deposits_sent || 0;
-  var depPaid = m.deposits_paid || 0;
-  var depAmount = parseFloat(m.deposits_collected) || 0;
-  document.getElementById('m-dep-sent').textContent = depSent;
-  document.getElementById('m-dep-paid').textContent = depPaid;
-  document.getElementById('m-dep-rate').textContent = depSent > 0 ? Math.round((depPaid / depSent) * 100) + '% collection rate' : 'No invoices yet';
-  document.getElementById('m-dep-amount').textContent = '$' + depAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-  // Funnel
-  const funnel = [
-    { label: 'Total Leads', value: m.total_leads, color: 'var(--accent)' },
-    { label: 'Tours Booked', value: m.tours_booked, color: 'var(--blue)' },
-    { label: 'Tours Attended', value: m.tours_attended, color: 'var(--amber)' },
-    { label: 'Events Booked', value: m.events_booked, color: 'var(--green)' },
-    { label: 'No-Shows', value: m.tours_no_show, color: 'var(--red)' },
-  ];
-  const funnelEl = document.getElementById('funnel-steps');
-  funnelEl.innerHTML = funnel.map(function(f) {
-    const pct = m.total_leads > 0 ? ((f.value / m.total_leads) * 100).toFixed(0) + '%' : '—';
-    return '<div class="funnel-step">'
-      + '<div class="funnel-dot" style="background:' + f.color + '"></div>'
-      + '<div class="funnel-step-label">' + f.label + '</div>'
-      + '<div class="funnel-step-value">' + f.value + '<span class="funnel-step-pct">' + pct + '</span></div>'
-      + '</div>';
-  }).join('');
-
-  // Load chart
-  loadChart();
-}
-
-async function loadChart() {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const { data } = await sb.from('leads_by_date').select('*').gte('lead_date', thirtyDaysAgo).order('lead_date', { ascending: true });
-
-  const chartEl = document.getElementById('chart-leads');
-  if (!data || data.length === 0) {
-    chartEl.innerHTML = '<div class="loading">No data in the last 30 days</div>';
-    return;
-  }
-
-  // Build line chart with SVG
-  var W = 680, H = 180, padL = 36, padR = 16, padT = 16, padB = 32;
-  var maxVal = Math.max(...data.map(function(d) { return d.lead_count; }), 1);
-  var plotW = W - padL - padR;
-  var plotH = H - padT - padB;
-  var step = data.length > 1 ? plotW / (data.length - 1) : plotW;
-
-  // Build points
-  var points = data.map(function(d, i) {
-    var x = padL + (data.length > 1 ? i * step : plotW / 2);
-    var y = padT + plotH - (d.lead_count / maxVal) * plotH;
-    return { x: x, y: y, count: d.lead_count, date: d.lead_date };
+// Close mobile nav on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
   });
-
-  // SVG path
-  var linePath = points.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
-  var areaPath = linePath + ' L' + points[points.length - 1].x.toFixed(1) + ',' + (padT + plotH) + ' L' + points[0].x.toFixed(1) + ',' + (padT + plotH) + ' Z';
-
-  // Y-axis labels
-  var yLabels = '';
-  for (var yi = 0; yi <= 4; yi++) {
-    var yVal = Math.round(maxVal * (yi / 4));
-    var yPos = padT + plotH - (yi / 4) * plotH;
-    yLabels += '<text x="' + (padL - 8) + '" y="' + (yPos + 3) + '" text-anchor="end" fill="rgba(255,255,255,0.2)" font-size="9">' + yVal + '</text>';
-    yLabels += '<line x1="' + padL + '" y1="' + yPos + '" x2="' + (W - padR) + '" y2="' + yPos + '" stroke="rgba(255,255,255,0.04)"/>';
-  }
-
-  // X-axis labels (show ~6 evenly spaced)
-  var xLabels = '';
-  var labelStep = Math.max(1, Math.floor(data.length / 6));
-  for (var xi = 0; xi < data.length; xi += labelStep) {
-    var lbl = new Date(data[xi].lead_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    xLabels += '<text x="' + points[xi].x + '" y="' + (H - 6) + '" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="9">' + lbl + '</text>';
-  }
-
-  // Dots
-  var dots = points.map(function(p) {
-    var lbl = new Date(p.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="var(--accent)" stroke="var(--card)" stroke-width="2">'
-      + '<title>' + lbl + ': ' + p.count + ' conversations</title></circle>';
-  }).join('');
-
-  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;font-family:Outfit,sans-serif;">'
-    + yLabels + xLabels
-    + '<defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">'
-    + '<stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/>'
-    + '<stop offset="100%" stop-color="var(--accent)" stop-opacity="0.01"/>'
-    + '</linearGradient></defs>'
-    + '<path d="' + areaPath + '" fill="url(#areaFill)"/>'
-    + '<path d="' + linePath + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
-    + dots
-    + '</svg>';
-
-  chartEl.innerHTML = '<div class="line-chart">' + svg + '</div>';
-}
-
-// ============================================
-// LEADS TABLE
-// ============================================
-async function loadLeads() {
-  const { data: leads, error } = await sb.from('recent_leads').select('*').limit(100);
-
-  if (error || !leads) {
-    document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="9" class="loading">Error loading leads</td></tr>';
-    return;
-  }
-
-  document.getElementById('leads-count').textContent = leads.length + ' leads';
-
-  const tbody = document.getElementById('leads-tbody');
-  tbody.innerHTML = leads.map(function(l) {
-    const phone = l.phone ? '(' + l.phone.slice(0,3) + ') ' + l.phone.slice(3,6) + '-' + l.phone.slice(6) : '—';
-    const created = l.created_at ? new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-
-    let statusBadge = '';
-    if (l.event_booked) statusBadge = '<span class="badge badge-green">Event Booked</span>';
-    else if (l.tour_attended === true) statusBadge = '<span class="badge badge-blue">Attended</span>';
-    else if (l.tour_attended === false) statusBadge = '<span class="badge badge-red">No-Show</span>';
-    else if (l.tour_booked) statusBadge = '<span class="badge badge-amber">Tour Booked</span>';
-    else statusBadge = '<span class="badge badge-dim">' + (l.lead_status || 'New') + '</span>';
-
-    const tourBadge = l.tour_booked ? '<span class="badge badge-green">Yes</span>' : '<span class="badge badge-dim">No</span>';
-
-    let revenueCell = '';
-    if (l.event_booked) {
-      var savedRev = l.event_revenue ? '$' + parseFloat(l.event_revenue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
-      revenueCell = '<td>'
-        + '<div style="display:flex;align-items:center;gap:6px;">'
-        + '<input type="text" id="rev-' + l.session_id + '" placeholder="Estimated Final Price" '
-        + 'value="' + savedRev + '" '
-        + 'style="width:130px;padding:6px 10px;background:' + 'rgba(255,255,255,0.04)' + ';border:1px solid rgba(255,255,255,0.1);border-radius:6px;'
-        + 'font-size:12px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none;" '
-        + 'onfocus="if(this.value.startsWith(\'$\'))this.value=this.value.replace(/[$,]/g,\'\')" '
-        + 'onblur="formatRevInput(this)" '
-        + 'onkeypress="if(event.key===\'Enter\')saveRevenue(\'' + l.session_id + '\')">'
-        + '<button onclick="saveRevenue(\'' + l.session_id + '\')" '
-        + 'style="padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;'
-        + 'font-size:10px;font-family:Outfit,sans-serif;cursor:pointer;white-space:nowrap;">Save</button>'
-        + '</div></td>';
-    } else {
-      revenueCell = '<td style="color:var(--text-dim);">—</td>';
-    }
-
-    return '<tr>'
-      + '<td class="name-cell">' + (l.name || '—') + '</td>'
-      + '<td>' + (l.email || '—') + '</td>'
-      + '<td>' + phone + '</td>'
-      + '<td>' + (l.date_interest || '—') + '</td>'
-      + '<td>' + (l.guest_count || '—') + '</td>'
-      + '<td>' + tourBadge + '</td>'
-      + '<td>' + statusBadge + '</td>'
-      + revenueCell
-      + '<td>' + created + '</td>'
-      + '</tr>';
-  }).join('');
-}
-
-// ============================================
-// FOLLOW-UPS
-// ============================================
-async function loadFollowups() {
-  const { data: metrics } = await sb.from('dashboard_metrics').select('*');
-  if (!metrics || metrics.length === 0) return;
-
-  const m = userRole === 'admin' && metrics.length > 1
-    ? {
-        reminders_sent: metrics.reduce((s, v) => s + (v.reminders_sent || 0), 0),
-        attendance_checks_sent: metrics.reduce((s, v) => s + (v.attendance_checks_sent || 0), 0),
-        post_tour_emails_sent: metrics.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
-        nurture_emails_sent: metrics.reduce((s, v) => s + (v.nurture_emails_sent || 0), 0),
-        unsubscribed: metrics.reduce((s, v) => s + (v.unsubscribed || 0), 0),
-        followup_optins: metrics.reduce((s, v) => s + (v.followup_optins || 0), 0),
-      }
-    : metrics[0];
-
-  const stats = [
-    { label: 'Tour Reminders Sent', value: m.reminders_sent, color: 'var(--blue)' },
-    { label: 'Attendance Checks Sent', value: m.attendance_checks_sent, color: 'var(--amber)' },
-    { label: 'Post-Tour Emails', value: m.post_tour_emails_sent, color: 'var(--green)' },
-    { label: 'Nurture Emails', value: m.nurture_emails_sent, color: 'var(--accent)' },
-    { label: 'Follow-up Opt-ins', value: m.followup_optins, color: 'var(--green)' },
-    { label: 'Unsubscribed', value: m.unsubscribed, color: 'var(--red)' },
-  ];
-
-  document.getElementById('followup-metrics').innerHTML = stats.map(function(s) {
-    return '<div class="metric-card">'
-      + '<div class="metric-label" style="color:' + s.color + '">' + s.label + '</div>'
-      + '<div class="metric-value">' + s.value + '</div>'
-      + '</div>';
-  }).join('');
-}
-
-// ============================================
-// REVENUE INPUT FORMATTING
-// ============================================
-function formatRevInput(input) {
-  var raw = input.value.replace(/[^0-9.]/g, '');
-  var num = parseFloat(raw);
-  if (!isNaN(num) && num > 0) {
-    input.value = '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  } else if (raw === '') {
-    input.value = '';
-  }
-}
-
-// ============================================
-// SAVE REVENUE
-// ============================================
-async function saveRevenue(sessionId) {
-  var input = document.getElementById('rev-' + sessionId);
-  if (!input) return;
-  var rawVal = input.value.replace(/[^0-9.]/g, '');
-  var amount = parseFloat(rawVal);
-  if (isNaN(amount) || amount <= 0) {
-    input.style.borderColor = 'var(--red)';
-    setTimeout(function() { input.style.borderColor = 'rgba(255,255,255,0.1)'; }, 1500);
-    return;
-  }
-  var { error } = await sb.from('leads').update({ event_revenue: amount }).eq('session_id', sessionId);
-  if (error) {
-    input.style.borderColor = 'var(--red)';
-    console.error('Save revenue error:', error);
-  } else {
-    input.value = '$' + amount.toLocaleString();
-    input.style.borderColor = 'var(--green)';
-    setTimeout(function() { input.style.borderColor = 'rgba(255,255,255,0.1)'; }, 1500);
-  }
-}
-
-// ============================================
-// PASSWORD RESET HANDLER
-// ============================================
-async function checkForPasswordReset() {
-  // Supabase sends recovery links with hash params
-  var hash = window.location.hash;
-  if (hash && hash.includes('type=recovery')) {
-    // Let Supabase client pick up the session from the URL
-    var { data, error } = await sb.auth.getSession();
-    if (data && data.session) {
-      // User is authenticated via recovery token — show reset form
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('reset-page').style.display = 'flex';
-      return true;
-    }
-  }
-  return false;
-}
-
-async function handleResetPassword() {
-  var pw = document.getElementById('reset-password').value;
-  var confirm = document.getElementById('reset-confirm').value;
-  var btn = document.getElementById('reset-btn');
-  var err = document.getElementById('reset-error');
-  var success = document.getElementById('reset-success');
-
-  err.style.display = 'none';
-  success.style.display = 'none';
-
-  if (!pw || pw.length < 6) {
-    err.textContent = 'Password must be at least 6 characters';
-    err.style.display = 'block';
-    return;
-  }
-  if (pw !== confirm) {
-    err.textContent = 'Passwords do not match';
-    err.style.display = 'block';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Updating...';
-
-  var { error } = await sb.auth.updateUser({ password: pw });
-
-  if (error) {
-    err.textContent = error.message;
-    err.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Set Password';
-    return;
-  }
-
-  success.textContent = 'Password updated! Redirecting to dashboard...';
-  success.style.display = 'block';
-  btn.style.display = 'none';
-
-  // Clean the URL hash and redirect to dashboard
-  setTimeout(function() {
-    window.location.hash = '';
-    window.location.reload();
-  }, 1500);
-}
-
-// Enter key on confirm field
-document.getElementById('reset-confirm').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') handleResetPassword();
 });
 
-// ============================================
-// INIT
-// ============================================
-async function init() {
-  var isReset = await checkForPasswordReset();
-  if (!isReset) {
-    await checkSession();
-  }
-}
-init();
+// Scroll reveal
+const revealElements = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+revealElements.forEach(el => observer.observe(el));
 </script>
+
+<!-- Zeni Widget -->
+<script src="https://zentrust-ai.github.io/zentrust-widget-cdn/widget-loader.js" data-venue-id="grand_manor" data-theme="_default"></script>
+
 </body>
 </html>
