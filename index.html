@@ -7,229 +7,111 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --bg: #0d1117;
-  --surface: #131b2e;
-  --card: #1a2236;
-  --border: rgba(255,255,255,0.06);
-  --accent: #3a9fb0;
-  --accent-soft: rgba(58,159,176,0.12);
-  --green: #4ade80;
-  --green-soft: rgba(74,222,128,0.12);
-  --amber: #f59e0b;
-  --amber-soft: rgba(245,158,11,0.12);
-  --red: #ef4444;
-  --red-soft: rgba(239,68,68,0.12);
-  --blue: #3b82f6;
-  --blue-soft: rgba(59,130,246,0.12);
-  --text: rgba(255,255,255,0.9);
-  --text-secondary: rgba(255,255,255,0.5);
-  --text-dim: rgba(255,255,255,0.25);
-  --font: 'Outfit', -apple-system, sans-serif;
-}
-html, body { height:100%; }
-body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
-
-/* LOGIN */
-.login-page {
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
-  background:var(--bg);
-}
-.login-box {
-  width:380px; background:var(--surface); border:1px solid var(--border);
-  border-radius:16px; padding:40px 36px; text-align:center;
-}
-.login-logo { font-size:28px; font-weight:700; margin-bottom:6px; color:#fff; letter-spacing:1.5px; }
-.login-sub { font-size:13px; color:var(--text-secondary); margin-bottom:32px; }
-.login-input {
-  width:100%; padding:13px 16px; background:rgba(255,255,255,0.04);
-  border:1px solid var(--border); border-radius:10px; font-family:var(--font);
-  font-size:14px; color:var(--text); outline:none; transition:border-color 0.2s;
-  margin-bottom:12px;
-}
-.login-input:focus { border-color:var(--accent); }
-.login-input::placeholder { color:var(--text-dim); }
-.login-btn {
-  width:100%; padding:14px; background:var(--accent); color:#fff; border:none;
-  border-radius:10px; font-family:var(--font); font-size:14px; font-weight:600;
-  cursor:pointer; margin-top:8px; transition:background 0.2s;
-}
-.login-btn:hover { background:#4dbbc9; color:#0d1117; }
-.login-btn:disabled { background:rgba(255,255,255,0.06); color:var(--text-dim); cursor:wait; }
-.login-error { font-size:12px; color:var(--red); margin-top:12px; display:none; }
-
-/* LAYOUT */
-.app { display:none; min-height:100vh; }
-.sidebar {
-  position:fixed; top:0; left:0; bottom:0; width:220px;
-  background:var(--surface); border-right:1px solid var(--border);
-  display:flex; flex-direction:column; padding:24px 0; z-index:10;
-}
-.sidebar-logo {
-  font-size:20px; font-weight:700; padding:0 24px; margin-bottom:32px;
-  color:#fff; letter-spacing:1.5px;
-}
-.sidebar-nav { display:flex; flex-direction:column; gap:2px; padding:0 12px; flex:1; }
-.sidebar-link {
-  display:flex; align-items:center; gap:10px; padding:10px 12px;
-  border-radius:8px; font-size:13px; font-weight:500; color:var(--text-secondary);
-  cursor:pointer; transition:all 0.15s; text-decoration:none; border:none; background:none;
-  font-family:var(--font); width:100%; text-align:left;
-}
-.sidebar-link:hover { background:rgba(255,255,255,0.04); color:var(--text); }
-.sidebar-link.active { background:var(--accent-soft); color:var(--accent); }
-.sidebar-link svg { width:18px; height:18px; opacity:0.6; }
-.sidebar-bottom {
-  padding:16px 24px; border-top:1px solid var(--border);
-  display:flex; flex-direction:column; gap:8px;
-}
-.sidebar-user { font-size:12px; color:var(--text-secondary); }
-.sidebar-role { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; }
-.logout-btn {
-  background:none; border:1px solid var(--border); color:var(--text-secondary);
-  padding:8px; border-radius:6px; font-size:11px; font-family:var(--font);
-  cursor:pointer; transition:all 0.15s; text-transform:uppercase; letter-spacing:0.5px;
-}
-.logout-btn:hover { border-color:var(--red); color:var(--red); }
-
-/* VENUE SELECTOR */
-.venue-selector {
-  padding:0 12px; margin-bottom:16px;
-}
-.venue-selector label {
-  font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px;
-  color:var(--text-dim); display:block; margin-bottom:6px; padding-left:4px;
-}
-.venue-selector select {
-  width:100%; padding:9px 12px; background:rgba(255,255,255,0.04);
-  border:1px solid var(--border); border-radius:8px; font-family:var(--font);
-  font-size:12px; font-weight:500; color:var(--text); outline:none;
-  cursor:pointer; transition:border-color 0.2s; appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 10px center;
-}
-.venue-selector select:focus { border-color:var(--accent); }
-.venue-selector select option { background:var(--surface); color:var(--text); }
-
-.main { margin-left:220px; padding:32px; }
-.page-header {
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:28px;
-}
-.page-title { font-size:22px; font-weight:600; }
-.page-venue { font-size:13px; color:var(--text-secondary); margin-top:4px; }
-.header-badge {
-  font-size:11px; font-weight:500; padding:6px 14px; border-radius:6px;
-  background:var(--green-soft); color:var(--green); text-transform:uppercase; letter-spacing:0.5px;
-}
-
-/* METRIC CARDS */
-.metrics-grid {
-  display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:28px;
-}
-.metric-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  padding:22px 20px; transition:all 0.2s;
-}
-.metric-card:hover { border-color:rgba(255,255,255,0.1); }
-.metric-label {
-  font-size:11px; font-weight:500; color:var(--text-dim);
-  text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;
-}
-.metric-value { font-size:32px; font-weight:600; line-height:1; margin-bottom:4px; color:var(--text); }
-.metric-sub { font-size:12px; color:var(--text-secondary); }
-.label-accent { color:var(--accent); }
-.label-green { color:var(--green); }
-.label-amber { color:var(--amber); }
-
-/* TWO COLUMN LAYOUT */
-.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
-
-/* CHART AREA */
-.chart-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  padding:24px; min-height:280px;
-}
-.chart-title {
-  font-size:14px; font-weight:600; margin-bottom:16px;
-  display:flex; justify-content:space-between; align-items:center;
-}
-.chart-title span { font-size:11px; color:var(--text-dim); font-weight:400; }
-.chart-area { position:relative; height:200px; }
-.line-chart { position:relative; width:100%; height:100%; }
-.line-chart svg { width:100%; height:100%; }
-
-/* FUNNEL */
-.funnel-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  padding:24px;
-}
-.funnel-title { font-size:14px; font-weight:600; margin-bottom:20px; }
-.funnel-step {
-  display:flex; align-items:center; gap:14px; padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-.funnel-step:last-child { border-bottom:none; }
-.funnel-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.funnel-step-label { flex:1; font-size:13px; color:var(--text-secondary); }
-.funnel-step-value { font-size:15px; font-weight:600; }
-.funnel-step-pct { font-size:11px; color:var(--text-dim); margin-left:6px; }
-
-/* LEADS TABLE */
-.table-card {
-  background:var(--card); border:1px solid var(--border); border-radius:12px;
-  overflow:hidden;
-}
-.table-header {
-  padding:18px 24px; display:flex; justify-content:space-between; align-items:center;
-  border-bottom:1px solid var(--border);
-}
-.table-header h3 { font-size:14px; font-weight:600; }
-.table-count { font-size:12px; color:var(--text-dim); }
-table { width:100%; border-collapse:collapse; font-size:13px; }
-th {
-  text-align:left; padding:10px 16px; font-size:10px; font-weight:600;
-  text-transform:uppercase; letter-spacing:1px; color:var(--text-dim);
-  background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);
-}
-td {
-  padding:12px 16px; border-bottom:1px solid var(--border);
-  color:var(--text-secondary);
-}
-tr:hover td { background:rgba(255,255,255,0.02); }
-.badge {
-  display:inline-block; padding:3px 10px; border-radius:20px;
-  font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;
-}
-.badge-green { background:var(--green-soft); color:var(--green); }
-.badge-amber { background:var(--amber-soft); color:var(--amber); }
-.badge-red { background:var(--red-soft); color:var(--red); }
-.badge-blue { background:var(--blue-soft); color:var(--blue); }
-.badge-dim { background:rgba(255,255,255,0.04); color:var(--text-dim); }
-td.name-cell { color:var(--text); font-weight:500; }
-
-/* LOADING */
-.loading {
-  display:flex; align-items:center; justify-content:center;
-  min-height:200px; color:var(--text-dim); font-size:14px;
-}
-
-/* RESPONSIVE */
-@media (max-width:1024px) {
-  .metrics-grid { grid-template-columns:repeat(2, 1fr); }
-  .two-col { grid-template-columns:1fr; }
-}
-@media (max-width:768px) {
-  .sidebar { display:none; }
-  .main { margin-left:0; padding:20px; }
-  .metrics-grid { grid-template-columns:1fr 1fr; }
-}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d1117;--surface:#131b2e;--card:#1a2236;--border:rgba(255,255,255,0.06);--accent:#3a9fb0;--accent-soft:rgba(58,159,176,0.12);--green:#4ade80;--green-soft:rgba(74,222,128,0.12);--amber:#f59e0b;--amber-soft:rgba(245,158,11,0.12);--red:#ef4444;--red-soft:rgba(239,68,68,0.12);--blue:#3b82f6;--blue-soft:rgba(59,130,246,0.12);--text:rgba(255,255,255,0.9);--text-secondary:rgba(255,255,255,0.5);--text-dim:rgba(255,255,255,0.25);--font:'Outfit',-apple-system,sans-serif}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.login-box{width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 36px;text-align:center}
+.login-logo{font-size:28px;font-weight:700;margin-bottom:6px;color:#fff;letter-spacing:1.5px}
+.login-sub{font-size:13px;color:var(--text-secondary);margin-bottom:32px}
+.login-input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s;margin-bottom:12px}
+.login-input:focus{border-color:var(--accent)}
+.login-input::placeholder{color:var(--text-dim)}
+.login-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:background 0.2s}
+.login-btn:hover{background:#4dbbc9;color:#0d1117}
+.login-btn:disabled{background:rgba(255,255,255,0.06);color:var(--text-dim);cursor:wait}
+.login-error{font-size:12px;color:var(--red);margin-top:12px;display:none}
+.app{display:none;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;z-index:10}
+.sidebar-logo{font-size:20px;font-weight:700;padding:0 24px;margin-bottom:32px;color:#fff;letter-spacing:1.5px}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 12px;flex:1}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;text-decoration:none;border:none;background:none;font-family:var(--font);width:100%;text-align:left}
+.sidebar-link:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.sidebar-link.active{background:var(--accent-soft);color:var(--accent)}
+.sidebar-link svg{width:18px;height:18px;opacity:0.6}
+.sidebar-bottom{padding:16px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.sidebar-user{font-size:12px;color:var(--text-secondary)}
+.sidebar-role{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);padding:8px;border-radius:6px;font-size:11px;font-family:var(--font);cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+.venue-selector{padding:0 12px;margin-bottom:16px}
+.venue-selector label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);display:block;margin-bottom:6px;padding-left:4px}
+.venue-selector select{width:100%;padding:9px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.venue-selector select:focus{border-color:var(--accent)}
+.venue-selector select option{background:var(--surface);color:var(--text)}
+.main{margin-left:220px;padding:32px}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.page-title{font-size:22px;font-weight:600}
+.page-venue{font-size:13px;color:var(--text-secondary);margin-top:4px}
+.header-badge{font-size:11px;font-weight:500;padding:6px 14px;border-radius:6px;background:var(--green-soft);color:var(--green);text-transform:uppercase;letter-spacing:0.5px}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 20px;transition:all 0.2s}
+.metric-card:hover{border-color:rgba(255,255,255,0.1)}
+.metric-label{font-size:11px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.metric-value{font-size:32px;font-weight:600;line-height:1;margin-bottom:4px;color:var(--text)}
+.metric-sub{font-size:12px;color:var(--text-secondary)}
+.label-accent{color:var(--accent)}.label-green{color:var(--green)}.label-amber{color:var(--amber)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;min-height:280px}
+.chart-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.chart-title span{font-size:11px;color:var(--text-dim);font-weight:400}
+.chart-area{position:relative;height:200px}
+.line-chart{position:relative;width:100%;height:100%}
+.line-chart svg{width:100%;height:100%}
+.funnel-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px}
+.funnel-title{font-size:14px;font-weight:600;margin-bottom:20px}
+.funnel-step{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.funnel-step:last-child{border-bottom:none}
+.funnel-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.funnel-step-label{flex:1;font-size:13px;color:var(--text-secondary)}
+.funnel-step-value{font-size:15px;font-weight:600}
+.funnel-step-pct{font-size:11px;color:var(--text-dim);margin-left:6px}
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-header{padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.table-header h3{font-size:14px;font-weight:600}
+.table-count{font-size:12px;color:var(--text-dim)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 16px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.badge-green{background:var(--green-soft);color:var(--green)}
+.badge-amber{background:var(--amber-soft);color:var(--amber)}
+.badge-red{background:var(--red-soft);color:var(--red)}
+.badge-blue{background:var(--blue-soft);color:var(--blue)}
+.badge-dim{background:rgba(255,255,255,0.04);color:var(--text-dim)}
+td.name-cell{color:var(--text);font-weight:500}
+.loading{display:flex;align-items:center;justify-content:center;min-height:200px;color:var(--text-dim);font-size:14px}
+/* Action buttons in tables */
+.action-btn{padding:5px 12px;border:none;border-radius:6px;font-size:10px;font-family:var(--font);font-weight:500;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px}
+.action-btn-accent{background:var(--accent);color:#fff}
+.action-btn-accent:hover{background:#4dbbc9}
+.action-btn-green{background:var(--green);color:#111}
+.action-btn-green:hover{background:#6af09a}
+.action-btn-outline{background:none;border:1px solid var(--border);color:var(--text-secondary)}
+.action-btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+/* Toast notification */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:100;transform:translateY(100px);opacity:0;transition:all 0.3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--green)}
+.toast.error{border-color:var(--red)}
+/* Invoice modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:50;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:420px;max-width:90%}
+.modal h3{font-size:18px;font-weight:600;margin-bottom:20px}
+.modal-field{margin-bottom:14px}
+.modal-field label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px}
+.modal-field input,.modal-field select{width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none}
+.modal-field input:focus,.modal-field select:focus{border-color:var(--accent)}
+.modal-actions{display:flex;gap:10px;margin-top:20px}
+.modal-actions button{flex:1;padding:12px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s}
+@media(max-width:1024px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:20px}.metrics-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-
-<!-- LOGIN PAGE -->
 <div class="login-page" id="login-page">
   <div class="login-box">
     <div class="login-logo">ZENI</div>
@@ -240,8 +122,6 @@ td.name-cell { color:var(--text); font-weight:500; }
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
-
-<!-- PASSWORD RESET PAGE -->
 <div class="login-page" id="reset-page" style="display:none;">
   <div class="login-box">
     <div class="login-logo">ZENI</div>
@@ -254,15 +134,12 @@ td.name-cell { color:var(--text); font-weight:500; }
   </div>
 </div>
 
-<!-- DASHBOARD APP -->
 <div class="app" id="app">
   <div class="sidebar">
     <div class="sidebar-logo">ZENI</div>
     <div class="venue-selector" id="venue-selector-wrap" style="display:none;">
       <label>Venue</label>
-      <select id="venue-select" onchange="onVenueChange()">
-        <option value="all">All Venues</option>
-      </select>
+      <select id="venue-select" onchange="onVenueChange()"><option value="all">All Venues</option></select>
     </div>
     <div class="sidebar-nav">
       <button class="sidebar-link active" data-page="overview" onclick="showPage('overview',this)">
@@ -272,6 +149,14 @@ td.name-cell { color:var(--text); font-weight:500; }
       <button class="sidebar-link" data-page="leads" onclick="showPage('leads',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Leads
+      </button>
+      <button class="sidebar-link" data-page="revenue" onclick="showPage('revenue',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Revenue
+      </button>
+      <button class="sidebar-link" data-page="invoices" onclick="showPage('invoices',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Invoices
       </button>
       <button class="sidebar-link" data-page="followups" onclick="showPage('followups',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -286,615 +171,184 @@ td.name-cell { color:var(--text); font-weight:500; }
   </div>
 
   <div class="main">
-    <!-- OVERVIEW PAGE -->
+    <!-- OVERVIEW -->
     <div id="page-overview">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Overview</div>
-          <div class="page-venue" id="venue-name">Loading...</div>
-        </div>
-        <div class="header-badge" id="status-badge">Live</div>
-      </div>
-
-      <div class="metrics-grid" id="metrics-grid" style="grid-template-columns:repeat(5, 1fr);">
+      <div class="page-header"><div><div class="page-title">Overview</div><div class="page-venue" id="venue-name">Loading...</div></div><div class="header-badge" id="status-badge">Live</div></div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr);">
         <div class="metric-card"><div class="metric-label">Total Leads</div><div class="metric-value" id="m-total-leads">—</div><div class="metric-sub">All time</div></div>
         <div class="metric-card"><div class="metric-label label-accent">Tours Booked</div><div class="metric-value" id="m-tours-booked">—</div><div class="metric-sub" id="m-lead-to-tour">—</div></div>
         <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="m-events-booked">—</div><div class="metric-sub" id="m-conversion-rate">—</div></div>
         <div class="metric-card"><div class="metric-label label-green">Zeni Revenue</div><div class="metric-value" id="m-revenue">—</div><div class="metric-sub" id="m-avg-revenue">—</div></div>
         <div class="metric-card"><div class="metric-label label-amber">SMS Opt-ins</div><div class="metric-value" id="m-sms-optins">—</div><div class="metric-sub" id="m-followup-optins">—</div></div>
       </div>
-      <div class="metrics-grid" style="grid-template-columns:repeat(3, 1fr); margin-bottom:28px;">
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
         <div class="metric-card"><div class="metric-label label-accent">Deposits Sent</div><div class="metric-value" id="m-dep-sent">—</div><div class="metric-sub">Invoices sent to leads</div></div>
         <div class="metric-card"><div class="metric-label label-green">Deposits Collected</div><div class="metric-value" id="m-dep-paid">—</div><div class="metric-sub" id="m-dep-rate">—</div></div>
         <div class="metric-card"><div class="metric-label label-green">Deposit Revenue</div><div class="metric-value" id="m-dep-amount">—</div><div class="metric-sub">Total collected via Zeni</div></div>
       </div>
-
       <div class="two-col">
-        <div class="chart-card">
-          <div class="chart-title">Conversations Per Day <span>Last 30 days</span></div>
-          <div class="chart-area" id="chart-leads"></div>
-        </div>
-        <div class="funnel-card">
-          <div class="funnel-title">Conversion Funnel</div>
-          <div id="funnel-steps"></div>
+        <div class="chart-card"><div class="chart-title">Conversations Per Day <span>Last 30 days</span></div><div class="chart-area" id="chart-leads"></div></div>
+        <div class="funnel-card"><div class="funnel-title">Conversion Funnel</div><div id="funnel-steps"></div></div>
+      </div>
+    </div>
+
+    <!-- LEADS -->
+    <div id="page-leads" style="display:none;">
+      <div class="page-header"><div><div class="page-title">Leads</div><div class="page-venue">All captured leads</div></div></div>
+      <div class="table-card">
+        <div class="table-header"><h3>Recent Leads</h3><div class="table-count" id="leads-count">—</div></div>
+        <div style="overflow-x:auto;">
+          <table><thead><tr><th>Venue</th><th>Name</th><th>Email</th><th>Phone</th><th>Event Date</th><th>Guests</th><th>Tour</th><th>Tour Date</th><th>Status</th><th>Created</th></tr></thead><tbody id="leads-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- LEADS PAGE -->
-    <div id="page-leads" style="display:none;">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Leads</div>
-          <div class="page-venue">All captured leads</div>
-        </div>
+    <!-- REVENUE TRACKER -->
+    <div id="page-revenue" style="display:none;">
+      <div class="page-header"><div><div class="page-title">Revenue Tracker</div><div class="page-venue">Mark events as booked and track revenue</div></div></div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
+        <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="rev-events">—</div><div class="metric-sub" id="rev-rate">—</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Total Revenue</div><div class="metric-value" id="rev-total">—</div><div class="metric-sub" id="rev-avg">—</div></div>
+        <div class="metric-card"><div class="metric-label label-accent">Pending</div><div class="metric-value" id="rev-pending">—</div><div class="metric-sub">Toured but not yet booked</div></div>
       </div>
       <div class="table-card">
-        <div class="table-header">
-          <h3>Recent Leads</h3>
-          <div class="table-count" id="leads-count">—</div>
-        </div>
+        <div class="table-header"><h3>Tour Attended — Awaiting Event Booking</h3><div class="table-count" id="rev-count">—</div></div>
         <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Venue</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Event Date</th>
-                <th>Guests</th>
-                <th>Tour</th>
-                <th>Status</th>
-                <th>Revenue</th>
-                <th>Created</th>
-              </tr>
-            </thead>
-            <tbody id="leads-tbody"></tbody>
-          </table>
+          <table><thead><tr><th>Venue</th><th>Name</th><th>Email</th><th>Event Date</th><th>Guests</th><th>Tour Date</th><th>Status</th><th>Revenue</th><th>Action</th></tr></thead><tbody id="rev-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- FOLLOW-UPS PAGE -->
-    <div id="page-followups" style="display:none;">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Follow-up Stats</div>
-          <div class="page-venue">Email & SMS automation performance</div>
+    <!-- INVOICES -->
+    <div id="page-invoices" style="display:none;">
+      <div class="page-header"><div><div class="page-title">Invoices</div><div class="page-venue">Send deposit invoices to leads via Stripe</div></div></div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
+        <div class="metric-card"><div class="metric-label label-accent">Invoices Sent</div><div class="metric-value" id="inv-sent">—</div><div class="metric-sub">All time</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Paid</div><div class="metric-value" id="inv-paid">—</div><div class="metric-sub" id="inv-rate">—</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Collected</div><div class="metric-value" id="inv-amount">—</div><div class="metric-sub">Total deposits received</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h3>Leads Ready for Invoicing</h3><div class="table-count" id="inv-count">—</div></div>
+        <div style="overflow-x:auto;">
+          <table><thead><tr><th>Venue</th><th>Name</th><th>Email</th><th>Event Date</th><th>Guests</th><th>Deposit Status</th><th>Amount</th><th>Action</th></tr></thead><tbody id="inv-tbody"></tbody></table>
         </div>
       </div>
+    </div>
+
+    <!-- FOLLOW-UPS -->
+    <div id="page-followups" style="display:none;">
+      <div class="page-header"><div><div class="page-title">Follow-up Stats</div><div class="page-venue">Email & SMS automation performance</div></div></div>
       <div class="metrics-grid" id="followup-metrics"></div>
     </div>
   </div>
 </div>
 
+<!-- INVOICE MODAL -->
+<div class="modal-overlay" id="invoice-modal">
+  <div class="modal">
+    <h3>Send Deposit Invoice</h3>
+    <div class="modal-field"><label>Lead</label><input type="text" id="inv-modal-name" disabled></div>
+    <div class="modal-field"><label>Email</label><input type="text" id="inv-modal-email" disabled></div>
+    <div class="modal-field"><label>Deposit Amount ($)</label><input type="number" id="inv-modal-amount" placeholder="500.00" min="1" step="0.01"></div>
+    <div class="modal-field"><label>Description</label><input type="text" id="inv-modal-desc" placeholder="Event deposit — The Grand Manor"></div>
+    <div class="modal-actions">
+      <button onclick="closeInvoiceModal()" style="background:none;border:1px solid var(--border);color:var(--text-secondary)">Cancel</button>
+      <button onclick="sendInvoice()" style="background:var(--accent);color:#fff;border:none">Send Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-// ============================================
-// SUPABASE CONFIG
-// ============================================
-const SUPABASE_URL = 'https://wjwjylmixdwkxpraykyf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqd2p5bG1peGR3a3hwcmF5a3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzUxNTUsImV4cCI6MjA4ODA1MTE1NX0.fDNNnmqpHijSfKOZqDiIzgR0_3xx7ZiCSc-xVuqOvBg';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL='https://wjwjylmixdwkxpraykyf.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqd2p5bG1peGR3a3hwcmF5a3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzUxNTUsImV4cCI6MjA4ODA1MTE1NX0.fDNNnmqpHijSfKOZqDiIzgR0_3xx7ZiCSc-xVuqOvBg';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let currentUser=null,userRole=null,userVenueId=null,selectedVenue='all',venueMap={};
+let invoiceSessionId=null;
 
-let currentUser = null;
-let userRole = null;
-let userVenueId = null;
-let selectedVenue = 'all';
-let venueMap = {};
+function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'success')+' show';setTimeout(function(){t.className='toast'},3000)}
 
-// ============================================
-// AUTH
-// ============================================
-async function checkSession() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadUserRole();
-    showApp();
-  }
-}
+async function checkSession(){const{data:{session}}=await sb.auth.getSession();if(session){currentUser=session.user;await loadUserRole();showApp()}}
+async function handleLogin(){const email=document.getElementById('login-email').value.trim(),password=document.getElementById('login-password').value,btn=document.getElementById('login-btn'),err=document.getElementById('login-error');if(!email||!password){err.textContent='Please enter email and password';err.style.display='block';return}btn.disabled=true;btn.textContent='Signing in...';err.style.display='none';const{data,error}=await sb.auth.signInWithPassword({email,password});if(error){err.textContent=error.message;err.style.display='block';btn.disabled=false;btn.textContent='Sign In';return}currentUser=data.user;await loadUserRole();showApp()}
+async function handleLogout(){await sb.auth.signOut();currentUser=null;userRole=null;userVenueId=null;document.getElementById('app').style.display='none';document.getElementById('login-page').style.display='flex'}
+async function loadUserRole(){const{data}=await sb.rpc('get_user_role');userRole=data||'venue_staff';const{data:vid}=await sb.rpc('get_user_venue_id');userVenueId=vid||null;document.getElementById('user-email').textContent=currentUser.email;document.getElementById('user-role').textContent=userRole==='admin'?'Administrator':'Venue Staff'}
+function showApp(){document.getElementById('login-page').style.display='none';document.getElementById('app').style.display='block';loadVenueSelector();loadOverview()}
+document.getElementById('login-password').addEventListener('keypress',function(e){if(e.key==='Enter')handleLogin()});
 
-async function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-error');
+async function loadVenueSelector(){if(userRole!=='admin'){document.getElementById('venue-selector-wrap').style.display='none';selectedVenue=userVenueId||'all';return}const{data:venues}=await sb.from('venues').select('id, name').eq('active',true).order('name');if(!venues||venues.length<=1){document.getElementById('venue-selector-wrap').style.display='none';return}var sel=document.getElementById('venue-select');sel.innerHTML='<option value="all">All Venues ('+venues.length+')</option>';venues.forEach(function(v){venueMap[v.id]=v.name;sel.innerHTML+='<option value="'+v.id+'">'+v.name+'</option>'});document.getElementById('venue-selector-wrap').style.display='block'}
+function onVenueChange(){selectedVenue=document.getElementById('venue-select').value;var activePage=document.querySelector('.sidebar-link.active');var page=activePage?activePage.getAttribute('data-page'):'overview';showPage(page)}
 
-  if (!email || !password) { err.textContent = 'Please enter email and password'; err.style.display = 'block'; return; }
-
-  btn.disabled = true; btn.textContent = 'Signing in...';
-  err.style.display = 'none';
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    err.textContent = error.message; err.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Sign In';
-    return;
-  }
-
-  currentUser = data.user;
-  await loadUserRole();
-  showApp();
-}
-
-async function handleLogout() {
-  await sb.auth.signOut();
-  currentUser = null; userRole = null; userVenueId = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-page').style.display = 'flex';
-}
-
-async function loadUserRole() {
-  const { data } = await sb.rpc('get_user_role');
-  userRole = data || 'venue_staff';
-
-  const { data: vid } = await sb.rpc('get_user_venue_id');
-  userVenueId = vid || null;
-
-  document.getElementById('user-email').textContent = currentUser.email;
-  document.getElementById('user-role').textContent = userRole === 'admin' ? 'Administrator' : 'Venue Staff';
-}
-
-function showApp() {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  loadVenueSelector();
-  loadOverview();
-}
-
-document.getElementById('login-password').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') handleLogin();
-});
-
-// ============================================
-// VENUE SELECTOR
-// ============================================
-async function loadVenueSelector() {
-  // Only show for admins
-  if (userRole !== 'admin') {
-    document.getElementById('venue-selector-wrap').style.display = 'none';
-    selectedVenue = userVenueId || 'all';
-    return;
-  }
-
-  const { data: venues } = await sb.from('venues').select('id, name').eq('active', true).order('name');
-
-  if (!venues || venues.length <= 1) {
-    document.getElementById('venue-selector-wrap').style.display = 'none';
-    return;
-  }
-
-  var sel = document.getElementById('venue-select');
-  sel.innerHTML = '<option value="all">All Venues (' + venues.length + ')</option>';
-  venues.forEach(function(v) {
-    venueMap[v.id] = v.name;
-    sel.innerHTML += '<option value="' + v.id + '">' + v.name + '</option>';
-  });
-
-  document.getElementById('venue-selector-wrap').style.display = 'block';
-}
-
-function onVenueChange() {
-  selectedVenue = document.getElementById('venue-select').value;
-  // Reload current page
-  var activePage = document.querySelector('.sidebar-link.active');
-  var page = activePage ? activePage.getAttribute('data-page') : 'overview';
-  if (page === 'overview') loadOverview();
-  else if (page === 'leads') loadLeads();
-  else if (page === 'followups') loadFollowups();
-}
-
-// ============================================
-// PAGE NAVIGATION
-// ============================================
-function showPage(page, el) {
-  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-  if (el) el.classList.add('active');
-  document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
-  document.getElementById('page-' + page).style.display = 'block';
-
-  if (page === 'overview') loadOverview();
-  else if (page === 'leads') loadLeads();
-  else if (page === 'followups') loadFollowups();
-}
+function showPage(page,el){document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active')});if(el)el.classList.add('active');else{var btn=document.querySelector('[data-page="'+page+'"]');if(btn)btn.classList.add('active')}document.querySelectorAll('[id^="page-"]').forEach(function(p){p.style.display='none'});document.getElementById('page-'+page).style.display='block';if(page==='overview')loadOverview();else if(page==='leads')loadLeads();else if(page==='revenue')loadRevenue();else if(page==='invoices')loadInvoices();else if(page==='followups')loadFollowups()}
 
 // ============================================
 // OVERVIEW
 // ============================================
-async function loadOverview() {
-  const { data: metrics, error } = await sb.from('dashboard_metrics').select('*');
+async function loadOverview(){const{data:metrics,error}=await sb.from('dashboard_metrics').select('*');if(error||!metrics||!metrics.length){document.getElementById('venue-name').textContent='No data available';return}var filtered=metrics;if(selectedVenue!=='all')filtered=metrics.filter(function(v){return v.venue_id===selectedVenue});if(!filtered.length){document.getElementById('venue-name').textContent='No data for selected venue';return}var m;if(filtered.length>1){m={venue_name:'All Venues ('+filtered.length+')',total_leads:filtered.reduce(function(s,v){return s+(v.total_leads||0)},0),tours_booked:filtered.reduce(function(s,v){return s+(v.tours_booked||0)},0),events_booked:filtered.reduce(function(s,v){return s+(v.events_booked||0)},0),tours_attended:filtered.reduce(function(s,v){return s+(v.tours_attended||0)},0),tours_no_show:filtered.reduce(function(s,v){return s+(v.tours_no_show||0)},0),followup_optins:filtered.reduce(function(s,v){return s+(v.followup_optins||0)},0),sms_optins:filtered.reduce(function(s,v){return s+(v.sms_optins||0)},0),total_revenue:filtered.reduce(function(s,v){return s+(parseFloat(v.total_revenue)||0)},0),reminders_sent:filtered.reduce(function(s,v){return s+(v.reminders_sent||0)},0),attendance_checks_sent:filtered.reduce(function(s,v){return s+(v.attendance_checks_sent||0)},0),post_tour_emails_sent:filtered.reduce(function(s,v){return s+(v.post_tour_emails_sent||0)},0),nurture_emails_sent:filtered.reduce(function(s,v){return s+(v.nurture_emails_sent||0)},0),unsubscribed:filtered.reduce(function(s,v){return s+(v.unsubscribed||0)},0),deposits_sent:filtered.reduce(function(s,v){return s+(v.deposits_sent||0)},0),deposits_paid:filtered.reduce(function(s,v){return s+(v.deposits_paid||0)},0),deposits_collected:filtered.reduce(function(s,v){return s+(parseFloat(v.deposits_collected)||0)},0)};m.lead_to_tour_rate=m.total_leads>0?((m.tours_booked/m.total_leads)*100).toFixed(1):0;m.event_booking_rate=m.tours_booked>0?((m.events_booked/m.tours_booked)*100).toFixed(1):0}else{m=filtered[0]}
+document.getElementById('venue-name').textContent=m.venue_name;document.getElementById('m-total-leads').textContent=m.total_leads;document.getElementById('m-tours-booked').textContent=m.tours_booked;document.getElementById('m-lead-to-tour').textContent=m.lead_to_tour_rate+'% lead \u2192 tour';document.getElementById('m-events-booked').textContent=m.events_booked;document.getElementById('m-conversion-rate').textContent=m.event_booking_rate+'% tour \u2192 event';document.getElementById('m-sms-optins').textContent=m.sms_optins||0;document.getElementById('m-followup-optins').textContent=(m.followup_optins||0)+' email opt-ins';
+var rev=parseFloat(m.total_revenue)||0;document.getElementById('m-revenue').textContent='$'+rev.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});var avgRev=m.events_booked>0?Math.round(rev/m.events_booked):0;document.getElementById('m-avg-revenue').textContent=avgRev>0?'$'+avgRev.toLocaleString()+' avg per event':'No events yet';
+var depSent=m.deposits_sent||0,depPaid=m.deposits_paid||0,depAmount=parseFloat(m.deposits_collected)||0;document.getElementById('m-dep-sent').textContent=depSent;document.getElementById('m-dep-paid').textContent=depPaid;document.getElementById('m-dep-rate').textContent=depSent>0?Math.round((depPaid/depSent)*100)+'% collection rate':'No invoices yet';document.getElementById('m-dep-amount').textContent='$'+depAmount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+var funnel=[{label:'Total Leads',value:m.total_leads,color:'var(--accent)'},{label:'Tours Booked',value:m.tours_booked,color:'var(--blue)'},{label:'Tours Attended',value:m.tours_attended,color:'var(--amber)'},{label:'Events Booked',value:m.events_booked,color:'var(--green)'},{label:'No-Shows',value:m.tours_no_show,color:'var(--red)'}];document.getElementById('funnel-steps').innerHTML=funnel.map(function(f){var pct=m.total_leads>0?((f.value/m.total_leads)*100).toFixed(0)+'%':'\u2014';return'<div class="funnel-step"><div class="funnel-dot" style="background:'+f.color+'"></div><div class="funnel-step-label">'+f.label+'</div><div class="funnel-step-value">'+f.value+'<span class="funnel-step-pct">'+pct+'</span></div></div>'}).join('');loadChart()}
 
-  if (error || !metrics || metrics.length === 0) {
-    document.getElementById('venue-name').textContent = 'No data available';
-    return;
-  }
-
-  // Filter by selected venue
-  var filtered = metrics;
-  if (selectedVenue !== 'all') {
-    filtered = metrics.filter(function(v) { return v.venue_id === selectedVenue; });
-  }
-
-  if (filtered.length === 0) {
-    document.getElementById('venue-name').textContent = 'No data for selected venue';
-    return;
-  }
-
-  var m;
-  if (filtered.length > 1) {
-    m = {
-      venue_name: 'All Venues (' + filtered.length + ')',
-      total_leads: filtered.reduce((s, v) => s + (v.total_leads || 0), 0),
-      tours_booked: filtered.reduce((s, v) => s + (v.tours_booked || 0), 0),
-      events_booked: filtered.reduce((s, v) => s + (v.events_booked || 0), 0),
-      tours_attended: filtered.reduce((s, v) => s + (v.tours_attended || 0), 0),
-      tours_no_show: filtered.reduce((s, v) => s + (v.tours_no_show || 0), 0),
-      followup_optins: filtered.reduce((s, v) => s + (v.followup_optins || 0), 0),
-      sms_optins: filtered.reduce((s, v) => s + (v.sms_optins || 0), 0),
-      total_revenue: filtered.reduce((s, v) => s + (parseFloat(v.total_revenue) || 0), 0),
-      reminders_sent: filtered.reduce((s, v) => s + (v.reminders_sent || 0), 0),
-      attendance_checks_sent: filtered.reduce((s, v) => s + (v.attendance_checks_sent || 0), 0),
-      post_tour_emails_sent: filtered.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
-      nurture_emails_sent: filtered.reduce((s, v) => s + (v.nurture_emails_sent || 0), 0),
-      unsubscribed: filtered.reduce((s, v) => s + (v.unsubscribed || 0), 0),
-      deposits_sent: filtered.reduce((s, v) => s + (v.deposits_sent || 0), 0),
-      deposits_paid: filtered.reduce((s, v) => s + (v.deposits_paid || 0), 0),
-      deposits_collected: filtered.reduce((s, v) => s + (parseFloat(v.deposits_collected) || 0), 0),
-    };
-    m.lead_to_tour_rate = m.total_leads > 0 ? ((m.tours_booked / m.total_leads) * 100).toFixed(1) : 0;
-    m.event_booking_rate = m.tours_booked > 0 ? ((m.events_booked / m.tours_booked) * 100).toFixed(1) : 0;
-  } else {
-    m = filtered[0];
-  }
-
-  document.getElementById('venue-name').textContent = m.venue_name;
-  document.getElementById('m-total-leads').textContent = m.total_leads;
-  document.getElementById('m-tours-booked').textContent = m.tours_booked;
-  document.getElementById('m-lead-to-tour').textContent = m.lead_to_tour_rate + '% lead \u2192 tour';
-  document.getElementById('m-events-booked').textContent = m.events_booked;
-  document.getElementById('m-conversion-rate').textContent = m.event_booking_rate + '% tour \u2192 event';
-  document.getElementById('m-sms-optins').textContent = m.sms_optins || 0;
-  document.getElementById('m-followup-optins').textContent = (m.followup_optins || 0) + ' email opt-ins';
-
-  // Revenue
-  var rev = parseFloat(m.total_revenue) || 0;
-  document.getElementById('m-revenue').textContent = '$' + rev.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-  var avgRev = m.events_booked > 0 ? Math.round(rev / m.events_booked) : 0;
-  document.getElementById('m-avg-revenue').textContent = avgRev > 0 ? '$' + avgRev.toLocaleString() + ' avg per event' : 'No events yet';
-
-  // Deposits
-  var depSent = m.deposits_sent || 0;
-  var depPaid = m.deposits_paid || 0;
-  var depAmount = parseFloat(m.deposits_collected) || 0;
-  document.getElementById('m-dep-sent').textContent = depSent;
-  document.getElementById('m-dep-paid').textContent = depPaid;
-  document.getElementById('m-dep-rate').textContent = depSent > 0 ? Math.round((depPaid / depSent) * 100) + '% collection rate' : 'No invoices yet';
-  document.getElementById('m-dep-amount').textContent = '$' + depAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-  // Funnel
-  const funnel = [
-    { label: 'Total Leads', value: m.total_leads, color: 'var(--accent)' },
-    { label: 'Tours Booked', value: m.tours_booked, color: 'var(--blue)' },
-    { label: 'Tours Attended', value: m.tours_attended, color: 'var(--amber)' },
-    { label: 'Events Booked', value: m.events_booked, color: 'var(--green)' },
-    { label: 'No-Shows', value: m.tours_no_show, color: 'var(--red)' },
-  ];
-  const funnelEl = document.getElementById('funnel-steps');
-  funnelEl.innerHTML = funnel.map(function(f) {
-    const pct = m.total_leads > 0 ? ((f.value / m.total_leads) * 100).toFixed(0) + '%' : '\u2014';
-    return '<div class="funnel-step">'
-      + '<div class="funnel-dot" style="background:' + f.color + '"></div>'
-      + '<div class="funnel-step-label">' + f.label + '</div>'
-      + '<div class="funnel-step-value">' + f.value + '<span class="funnel-step-pct">' + pct + '</span></div>'
-      + '</div>';
-  }).join('');
-
-  loadChart();
-}
-
-async function loadChart() {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  var query = sb.from('leads_by_date').select('*').gte('lead_date', thirtyDaysAgo).order('lead_date', { ascending: true });
-
-  if (selectedVenue !== 'all') {
-    query = query.eq('venue_id', selectedVenue);
-  }
-
-  const { data } = await query;
-
-  const chartEl = document.getElementById('chart-leads');
-  if (!data || data.length === 0) {
-    chartEl.innerHTML = '<div class="loading">No data in the last 30 days</div>';
-    return;
-  }
-
-  // Aggregate by date if showing all venues
-  var chartData;
-  if (selectedVenue === 'all') {
-    var byDate = {};
-    data.forEach(function(d) {
-      if (!byDate[d.lead_date]) byDate[d.lead_date] = 0;
-      byDate[d.lead_date] += d.lead_count;
-    });
-    chartData = Object.keys(byDate).sort().map(function(k) { return { lead_date: k, lead_count: byDate[k] }; });
-  } else {
-    chartData = data;
-  }
-
-  var W = 680, H = 180, padL = 36, padR = 16, padT = 16, padB = 32;
-  var maxVal = Math.max(...chartData.map(function(d) { return d.lead_count; }), 1);
-  var plotW = W - padL - padR;
-  var plotH = H - padT - padB;
-  var step = chartData.length > 1 ? plotW / (chartData.length - 1) : plotW;
-
-  var points = chartData.map(function(d, i) {
-    var x = padL + (chartData.length > 1 ? i * step : plotW / 2);
-    var y = padT + plotH - (d.lead_count / maxVal) * plotH;
-    return { x: x, y: y, count: d.lead_count, date: d.lead_date };
-  });
-
-  var linePath = points.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
-  var areaPath = linePath + ' L' + points[points.length - 1].x.toFixed(1) + ',' + (padT + plotH) + ' L' + points[0].x.toFixed(1) + ',' + (padT + plotH) + ' Z';
-
-  var yLabels = '';
-  for (var yi = 0; yi <= 4; yi++) {
-    var yVal = Math.round(maxVal * (yi / 4));
-    var yPos = padT + plotH - (yi / 4) * plotH;
-    yLabels += '<text x="' + (padL - 8) + '" y="' + (yPos + 3) + '" text-anchor="end" fill="rgba(255,255,255,0.2)" font-size="9">' + yVal + '</text>';
-    yLabels += '<line x1="' + padL + '" y1="' + yPos + '" x2="' + (W - padR) + '" y2="' + yPos + '" stroke="rgba(255,255,255,0.04)"/>';
-  }
-
-  var xLabels = '';
-  var labelStep = Math.max(1, Math.floor(chartData.length / 6));
-  for (var xi = 0; xi < chartData.length; xi += labelStep) {
-    var lbl = new Date(chartData[xi].lead_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    xLabels += '<text x="' + points[xi].x + '" y="' + (H - 6) + '" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="9">' + lbl + '</text>';
-  }
-
-  var dots = points.map(function(p) {
-    var lbl = new Date(p.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="var(--accent)" stroke="var(--card)" stroke-width="2">'
-      + '<title>' + lbl + ': ' + p.count + ' conversations</title></circle>';
-  }).join('');
-
-  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;font-family:Outfit,sans-serif;">'
-    + yLabels + xLabels
-    + '<defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">'
-    + '<stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/>'
-    + '<stop offset="100%" stop-color="var(--accent)" stop-opacity="0.01"/>'
-    + '</linearGradient></defs>'
-    + '<path d="' + areaPath + '" fill="url(#areaFill)"/>'
-    + '<path d="' + linePath + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
-    + dots
-    + '</svg>';
-
-  chartEl.innerHTML = '<div class="line-chart">' + svg + '</div>';
-}
+async function loadChart(){var thirtyDaysAgo=new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];var query=sb.from('leads_by_date').select('*').gte('lead_date',thirtyDaysAgo).order('lead_date',{ascending:true});if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data}=await query;var chartEl=document.getElementById('chart-leads');if(!data||!data.length){chartEl.innerHTML='<div class="loading">No data in the last 30 days</div>';return}var chartData;if(selectedVenue==='all'){var byDate={};data.forEach(function(d){if(!byDate[d.lead_date])byDate[d.lead_date]=0;byDate[d.lead_date]+=d.lead_count});chartData=Object.keys(byDate).sort().map(function(k){return{lead_date:k,lead_count:byDate[k]}})}else{chartData=data}var W=680,H=180,padL=36,padR=16,padT=16,padB=32;var maxVal=Math.max.apply(null,chartData.map(function(d){return d.lead_count}).concat([1]));var plotW=W-padL-padR,plotH=H-padT-padB;var step=chartData.length>1?plotW/(chartData.length-1):plotW;var points=chartData.map(function(d,i){return{x:padL+(chartData.length>1?i*step:plotW/2),y:padT+plotH-(d.lead_count/maxVal)*plotH,count:d.lead_count,date:d.lead_date}});var linePath=points.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)}).join(' ');var areaPath=linePath+' L'+points[points.length-1].x.toFixed(1)+','+(padT+plotH)+' L'+points[0].x.toFixed(1)+','+(padT+plotH)+' Z';var yLabels='';for(var yi=0;yi<=4;yi++){var yVal=Math.round(maxVal*(yi/4)),yPos=padT+plotH-(yi/4)*plotH;yLabels+='<text x="'+(padL-8)+'" y="'+(yPos+3)+'" text-anchor="end" fill="rgba(255,255,255,0.2)" font-size="9">'+yVal+'</text><line x1="'+padL+'" y1="'+yPos+'" x2="'+(W-padR)+'" y2="'+yPos+'" stroke="rgba(255,255,255,0.04)"/>'}var xLabels='',labelStep=Math.max(1,Math.floor(chartData.length/6));for(var xi=0;xi<chartData.length;xi+=labelStep){var lbl=new Date(chartData[xi].lead_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});xLabels+='<text x="'+points[xi].x+'" y="'+(H-6)+'" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="9">'+lbl+'</text>'}var dots=points.map(function(p){var lbl=new Date(p.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});return'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.5" fill="var(--accent)" stroke="var(--card)" stroke-width="2"><title>'+lbl+': '+p.count+' conversations</title></circle>'}).join('');chartEl.innerHTML='<div class="line-chart"><svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;font-family:Outfit,sans-serif;">'+yLabels+xLabels+'<defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0.01"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#areaFill)"/><path d="'+linePath+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'</svg></div>'}
 
 // ============================================
-// LEADS TABLE
+// LEADS TABLE (Tour Date replaces Revenue)
 // ============================================
-async function loadLeads() {
-  var query = sb.from('recent_leads').select('*').limit(100);
+async function loadLeads(){var query=sb.from('recent_leads').select('*').limit(100);if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data:leads,error}=await query;if(error||!leads){document.getElementById('leads-tbody').innerHTML='<tr><td colspan="10" class="loading">Error loading leads</td></tr>';return}document.getElementById('leads-count').textContent=leads.length+' leads';document.getElementById('leads-tbody').innerHTML=leads.map(function(l){var phone=l.phone?'('+l.phone.slice(0,3)+') '+l.phone.slice(3,6)+'-'+l.phone.slice(6):'\u2014';var created=l.created_at?new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014';var venueName=venueMap[l.venue_id]||l.venue_id||'\u2014';var statusBadge='';if(l.event_booked)statusBadge='<span class="badge badge-green">Event Booked</span>';else if(l.tour_attended===true)statusBadge='<span class="badge badge-blue">Attended</span>';else if(l.tour_attended===false)statusBadge='<span class="badge badge-red">No-Show</span>';else if(l.tour_booked)statusBadge='<span class="badge badge-amber">Tour Booked</span>';else statusBadge='<span class="badge badge-dim">'+(l.lead_status||'New')+'</span>';var tourBadge=l.tour_booked?'<span class="badge badge-green">Yes</span>':'<span class="badge badge-dim">No</span>';return'<tr><td style="font-size:11px;color:var(--accent)">'+venueName+'</td><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+phone+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+tourBadge+'</td><td>'+(l.tour_date||'\u2014')+'</td><td>'+statusBadge+'</td><td>'+created+'</td></tr>'}).join('')}
 
-  if (selectedVenue !== 'all') {
-    query = query.eq('venue_id', selectedVenue);
-  }
+// ============================================
+// REVENUE TRACKER
+// ============================================
+async function loadRevenue(){var query=sb.from('recent_leads').select('*').limit(200);if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data:leads}=await query;if(!leads)leads=[];
+var toured=leads.filter(function(l){return l.tour_booked});var evBooked=leads.filter(function(l){return l.event_booked});var totalRev=evBooked.reduce(function(s,l){return s+(parseFloat(l.event_revenue)||0)},0);var pending=toured.filter(function(l){return l.tour_attended===true&&!l.event_booked});
+document.getElementById('rev-events').textContent=evBooked.length;document.getElementById('rev-rate').textContent=toured.length>0?Math.round(evBooked.length/toured.length*100)+'% of tours':'—';document.getElementById('rev-total').textContent='$'+totalRev.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});document.getElementById('rev-avg').textContent=evBooked.length>0?'$'+Math.round(totalRev/evBooked.length).toLocaleString()+' avg per event':'No events yet';document.getElementById('rev-pending').textContent=pending.length;document.getElementById('rev-count').textContent=pending.length+' leads';
+// Show all toured leads (attended or booked) for revenue entry
+var revLeads=leads.filter(function(l){return l.tour_booked&&(l.tour_attended===true||l.event_booked)});document.getElementById('rev-tbody').innerHTML=revLeads.map(function(l){var venueName=venueMap[l.venue_id]||l.venue_id||'\u2014';var statusBadge=l.event_booked?'<span class="badge badge-green">Event Booked</span>':'<span class="badge badge-blue">Attended</span>';var savedRev=l.event_revenue?'$'+parseFloat(l.event_revenue).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';var revInput='<div style="display:flex;align-items:center;gap:6px"><input type="text" id="rev-'+l.session_id+'" placeholder="$0.00" value="'+savedRev+'" style="width:100px;padding:6px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:12px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none" onfocus="if(this.value.startsWith(\'$\'))this.value=this.value.replace(/[$,]/g,\'\')" onblur="formatRevInput(this)" onkeypress="if(event.key===\'Enter\')saveRevenue(\''+l.session_id+'\')"><button onclick="saveRevenue(\''+l.session_id+'\')" class="action-btn action-btn-accent">Save</button></div>';var actionBtn=l.event_booked?'':'<button onclick="markEventBooked(\''+l.session_id+'\')" class="action-btn action-btn-green">Mark Booked</button>';return'<tr><td style="font-size:11px;color:var(--accent)">'+venueName+'</td><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+(l.tour_date||'\u2014')+'</td><td>'+statusBadge+'</td><td>'+revInput+'</td><td>'+actionBtn+'</td></tr>'}).join('')}
 
-  const { data: leads, error } = await query;
+async function markEventBooked(sessionId){var{error}=await sb.from('leads').update({event_booked:true,event_booked_at:new Date().toISOString()}).eq('session_id',sessionId);if(error){showToast('Error: '+error.message,'error')}else{showToast('Event marked as booked!','success');loadRevenue();loadOverview()}}
 
-  if (error || !leads) {
-    document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="10" class="loading">Error loading leads</td></tr>';
-    return;
-  }
+// ============================================
+// INVOICES
+// ============================================
+async function loadInvoices(){var query=sb.from('recent_leads').select('*').limit(200);if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data:leads}=await query;if(!leads)leads=[];
+var invoiceable=leads.filter(function(l){return l.tour_booked&&l.name&&l.email});var sent=leads.filter(function(l){return l.deposit_sent});var paid=leads.filter(function(l){return l.deposit_paid});var collected=paid.reduce(function(s,l){return s+(parseFloat(l.deposit_amount)||0)},0);
+document.getElementById('inv-sent').textContent=sent.length;document.getElementById('inv-paid').textContent=paid.length;document.getElementById('inv-rate').textContent=sent.length>0?Math.round(paid.length/sent.length*100)+'% paid':'—';document.getElementById('inv-amount').textContent='$'+collected.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});document.getElementById('inv-count').textContent=invoiceable.length+' leads';
+document.getElementById('inv-tbody').innerHTML=invoiceable.map(function(l){var venueName=venueMap[l.venue_id]||l.venue_id||'\u2014';var depStatus='';if(l.deposit_paid)depStatus='<span class="badge badge-green">Paid</span>';else if(l.deposit_sent)depStatus='<span class="badge badge-amber">Sent</span>';else depStatus='<span class="badge badge-dim">Not Sent</span>';var depAmt=l.deposit_amount?'$'+parseFloat(l.deposit_amount).toLocaleString('en-US',{minimumFractionDigits:2}):'\u2014';var actionBtn='';if(l.deposit_paid){actionBtn='<span style="color:var(--green);font-size:11px">\u2713 Paid</span>'}else if(l.deposit_sent){actionBtn='<button onclick="markDepositPaid(\''+l.session_id+'\')" class="action-btn action-btn-green">Mark Paid</button>'}else{actionBtn='<button onclick="openInvoiceModal(\''+l.session_id+'\',\''+encodeURIComponent(l.name||'')+'\',\''+encodeURIComponent(l.email||'')+'\')" class="action-btn action-btn-accent">Send Invoice</button>'}return'<tr><td style="font-size:11px;color:var(--accent)">'+venueName+'</td><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+depStatus+'</td><td>'+depAmt+'</td><td>'+actionBtn+'</td></tr>'}).join('')}
 
-  document.getElementById('leads-count').textContent = leads.length + ' leads';
+function openInvoiceModal(sessionId,name,email){invoiceSessionId=sessionId;document.getElementById('inv-modal-name').value=decodeURIComponent(name);document.getElementById('inv-modal-email').value=decodeURIComponent(email);document.getElementById('inv-modal-amount').value='';document.getElementById('inv-modal-desc').value='Event deposit';document.getElementById('invoice-modal').classList.add('show')}
+function closeInvoiceModal(){document.getElementById('invoice-modal').classList.remove('show');invoiceSessionId=null}
 
-  const tbody = document.getElementById('leads-tbody');
-  tbody.innerHTML = leads.map(function(l) {
-    const phone = l.phone ? '(' + l.phone.slice(0,3) + ') ' + l.phone.slice(3,6) + '-' + l.phone.slice(6) : '\u2014';
-    const created = l.created_at ? new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '\u2014';
+async function sendInvoice(){var amount=parseFloat(document.getElementById('inv-modal-amount').value);var desc=document.getElementById('inv-modal-desc').value||'Event deposit';if(!amount||amount<=0){showToast('Please enter a valid amount','error');return}
+// Update Supabase with deposit info
+var{error}=await sb.from('leads').update({deposit_sent:true,deposit_amount:amount,deposit_sent_at:new Date().toISOString()}).eq('session_id',invoiceSessionId);if(error){showToast('Error saving: '+error.message,'error');return}
+// TODO: Call n8n webhook to create Stripe invoice
+// For now, just mark as sent in Supabase
+showToast('Invoice for $'+amount.toLocaleString()+' marked as sent!','success');closeInvoiceModal();loadInvoices()}
 
-    // Venue name from map or venue_id
-    var venueName = venueMap[l.venue_id] || l.venue_id || '\u2014';
-
-    let statusBadge = '';
-    if (l.event_booked) statusBadge = '<span class="badge badge-green">Event Booked</span>';
-    else if (l.tour_attended === true) statusBadge = '<span class="badge badge-blue">Attended</span>';
-    else if (l.tour_attended === false) statusBadge = '<span class="badge badge-red">No-Show</span>';
-    else if (l.tour_booked) statusBadge = '<span class="badge badge-amber">Tour Booked</span>';
-    else statusBadge = '<span class="badge badge-dim">' + (l.lead_status || 'New') + '</span>';
-
-    const tourBadge = l.tour_booked ? '<span class="badge badge-green">Yes</span>' : '<span class="badge badge-dim">No</span>';
-
-    let revenueCell = '';
-    if (l.event_booked) {
-      var savedRev = l.event_revenue ? '$' + parseFloat(l.event_revenue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
-      revenueCell = '<td>'
-        + '<div style="display:flex;align-items:center;gap:6px;">'
-        + '<input type="text" id="rev-' + l.session_id + '" placeholder="Est. Price" '
-        + 'value="' + savedRev + '" '
-        + 'style="width:110px;padding:6px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;'
-        + 'font-size:12px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none;" '
-        + 'onfocus="if(this.value.startsWith(\'$\'))this.value=this.value.replace(/[$,]/g,\'\')" '
-        + 'onblur="formatRevInput(this)" '
-        + 'onkeypress="if(event.key===\'Enter\')saveRevenue(\'' + l.session_id + '\')">'
-        + '<button onclick="saveRevenue(\'' + l.session_id + '\')" '
-        + 'style="padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;'
-        + 'font-size:10px;font-family:Outfit,sans-serif;cursor:pointer;white-space:nowrap;">Save</button>'
-        + '</div></td>';
-    } else {
-      revenueCell = '<td style="color:var(--text-dim);">\u2014</td>';
-    }
-
-    return '<tr>'
-      + '<td style="font-size:11px;color:var(--accent);">' + venueName + '</td>'
-      + '<td class="name-cell">' + (l.name || '\u2014') + '</td>'
-      + '<td>' + (l.email || '\u2014') + '</td>'
-      + '<td>' + phone + '</td>'
-      + '<td>' + (l.date_interest || '\u2014') + '</td>'
-      + '<td>' + (l.guest_count || '\u2014') + '</td>'
-      + '<td>' + tourBadge + '</td>'
-      + '<td>' + statusBadge + '</td>'
-      + revenueCell
-      + '<td>' + created + '</td>'
-      + '</tr>';
-  }).join('');
-}
+async function markDepositPaid(sessionId){var{error}=await sb.from('leads').update({deposit_paid:true,deposit_paid_at:new Date().toISOString()}).eq('session_id',sessionId);if(error){showToast('Error: '+error.message,'error')}else{showToast('Deposit marked as paid!','success');loadInvoices()}}
 
 // ============================================
 // FOLLOW-UPS
 // ============================================
-async function loadFollowups() {
-  const { data: metrics } = await sb.from('dashboard_metrics').select('*');
-  if (!metrics || metrics.length === 0) return;
-
-  var filtered = metrics;
-  if (selectedVenue !== 'all') {
-    filtered = metrics.filter(function(v) { return v.venue_id === selectedVenue; });
-  }
-
-  if (filtered.length === 0) return;
-
-  const m = filtered.length > 1
-    ? {
-        reminders_sent: filtered.reduce((s, v) => s + (v.reminders_sent || 0), 0),
-        attendance_checks_sent: filtered.reduce((s, v) => s + (v.attendance_checks_sent || 0), 0),
-        post_tour_emails_sent: filtered.reduce((s, v) => s + (v.post_tour_emails_sent || 0), 0),
-        nurture_emails_sent: filtered.reduce((s, v) => s + (v.nurture_emails_sent || 0), 0),
-        unsubscribed: filtered.reduce((s, v) => s + (v.unsubscribed || 0), 0),
-        followup_optins: filtered.reduce((s, v) => s + (v.followup_optins || 0), 0),
-        sms_optins: filtered.reduce((s, v) => s + (v.sms_optins || 0), 0),
-      }
-    : filtered[0];
-
-  const stats = [
-    { label: 'Tour Reminders Sent', value: m.reminders_sent, color: 'var(--blue)' },
-    { label: 'Attendance Checks Sent', value: m.attendance_checks_sent, color: 'var(--amber)' },
-    { label: 'Post-Tour Emails', value: m.post_tour_emails_sent, color: 'var(--green)' },
-    { label: 'Nurture Emails', value: m.nurture_emails_sent, color: 'var(--accent)' },
-    { label: 'Email Opt-ins', value: m.followup_optins, color: 'var(--green)' },
-    { label: 'SMS Opt-ins', value: m.sms_optins || 0, color: 'var(--blue)' },
-    { label: 'Unsubscribed', value: m.unsubscribed, color: 'var(--red)' },
-  ];
-
-  document.getElementById('followup-metrics').innerHTML = stats.map(function(s) {
-    return '<div class="metric-card">'
-      + '<div class="metric-label" style="color:' + s.color + '">' + s.label + '</div>'
-      + '<div class="metric-value">' + s.value + '</div>'
-      + '</div>';
-  }).join('');
-}
+async function loadFollowups(){var{data:metrics}=await sb.from('dashboard_metrics').select('*');if(!metrics||!metrics.length)return;var filtered=metrics;if(selectedVenue!=='all')filtered=metrics.filter(function(v){return v.venue_id===selectedVenue});if(!filtered.length)return;var m=filtered.length>1?{reminders_sent:filtered.reduce(function(s,v){return s+(v.reminders_sent||0)},0),attendance_checks_sent:filtered.reduce(function(s,v){return s+(v.attendance_checks_sent||0)},0),post_tour_emails_sent:filtered.reduce(function(s,v){return s+(v.post_tour_emails_sent||0)},0),nurture_emails_sent:filtered.reduce(function(s,v){return s+(v.nurture_emails_sent||0)},0),unsubscribed:filtered.reduce(function(s,v){return s+(v.unsubscribed||0)},0),followup_optins:filtered.reduce(function(s,v){return s+(v.followup_optins||0)},0),sms_optins:filtered.reduce(function(s,v){return s+(v.sms_optins||0)},0)}:filtered[0];
+document.getElementById('followup-metrics').innerHTML=[{label:'Tour Reminders Sent',value:m.reminders_sent,color:'var(--blue)'},{label:'Attendance Checks Sent',value:m.attendance_checks_sent,color:'var(--amber)'},{label:'Post-Tour Emails',value:m.post_tour_emails_sent,color:'var(--green)'},{label:'Nurture Emails',value:m.nurture_emails_sent,color:'var(--accent)'},{label:'Email Opt-ins',value:m.followup_optins,color:'var(--green)'},{label:'SMS Opt-ins',value:m.sms_optins||0,color:'var(--blue)'},{label:'Unsubscribed',value:m.unsubscribed,color:'var(--red)'}].map(function(s){return'<div class="metric-card"><div class="metric-label" style="color:'+s.color+'">'+s.label+'</div><div class="metric-value">'+s.value+'</div></div>'}).join('')}
 
 // ============================================
-// REVENUE INPUT
+// REVENUE HELPERS
 // ============================================
-function formatRevInput(input) {
-  var raw = input.value.replace(/[^0-9.]/g, '');
-  var num = parseFloat(raw);
-  if (!isNaN(num) && num > 0) {
-    input.value = '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  } else if (raw === '') {
-    input.value = '';
-  }
-}
-
-async function saveRevenue(sessionId) {
-  var input = document.getElementById('rev-' + sessionId);
-  if (!input) return;
-  var rawVal = input.value.replace(/[^0-9.]/g, '');
-  var amount = parseFloat(rawVal);
-  if (isNaN(amount) || amount <= 0) {
-    input.style.borderColor = 'var(--red)';
-    setTimeout(function() { input.style.borderColor = 'rgba(255,255,255,0.1)'; }, 1500);
-    return;
-  }
-  var { error } = await sb.from('leads').update({ event_revenue: amount }).eq('session_id', sessionId);
-  if (error) {
-    input.style.borderColor = 'var(--red)';
-    console.error('Save revenue error:', error);
-  } else {
-    input.value = '$' + amount.toLocaleString();
-    input.style.borderColor = 'var(--green)';
-    setTimeout(function() { input.style.borderColor = 'rgba(255,255,255,0.1)'; }, 1500);
-  }
-}
+function formatRevInput(input){var raw=input.value.replace(/[^0-9.]/g,'');var num=parseFloat(raw);if(!isNaN(num)&&num>0)input.value='$'+num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});else if(raw==='')input.value=''}
+async function saveRevenue(sessionId){var input=document.getElementById('rev-'+sessionId);if(!input)return;var rawVal=input.value.replace(/[^0-9.]/g,'');var amount=parseFloat(rawVal);if(isNaN(amount)||amount<=0){input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='rgba(255,255,255,0.1)'},1500);return}var{error}=await sb.from('leads').update({event_revenue:amount}).eq('session_id',sessionId);if(error){input.style.borderColor='var(--red)';showToast('Error saving revenue','error')}else{input.value='$'+amount.toLocaleString();input.style.borderColor='var(--green)';showToast('Revenue saved!','success');setTimeout(function(){input.style.borderColor='rgba(255,255,255,0.1)'},1500)}}
 
 // ============================================
 // PASSWORD RESET
 // ============================================
-async function checkForPasswordReset() {
-  var hash = window.location.hash;
-  if (hash && hash.includes('type=recovery')) {
-    var { data, error } = await sb.auth.getSession();
-    if (data && data.session) {
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('reset-page').style.display = 'flex';
-      return true;
-    }
-  }
-  return false;
-}
+async function checkForPasswordReset(){var hash=window.location.hash;if(hash&&hash.includes('type=recovery')){var{data}=await sb.auth.getSession();if(data&&data.session){document.getElementById('login-page').style.display='none';document.getElementById('reset-page').style.display='flex';return true}}return false}
+async function handleResetPassword(){var pw=document.getElementById('reset-password').value,confirm=document.getElementById('reset-confirm').value,btn=document.getElementById('reset-btn'),err=document.getElementById('reset-error'),success=document.getElementById('reset-success');err.style.display='none';success.style.display='none';if(!pw||pw.length<6){err.textContent='Password must be at least 6 characters';err.style.display='block';return}if(pw!==confirm){err.textContent='Passwords do not match';err.style.display='block';return}btn.disabled=true;btn.textContent='Updating...';var{error}=await sb.auth.updateUser({password:pw});if(error){err.textContent=error.message;err.style.display='block';btn.disabled=false;btn.textContent='Set Password';return}success.textContent='Password updated! Redirecting to dashboard...';success.style.display='block';btn.style.display='none';setTimeout(function(){window.location.hash='';window.location.reload()},1500)}
+document.getElementById('reset-confirm').addEventListener('keypress',function(e){if(e.key==='Enter')handleResetPassword()});
 
-async function handleResetPassword() {
-  var pw = document.getElementById('reset-password').value;
-  var confirm = document.getElementById('reset-confirm').value;
-  var btn = document.getElementById('reset-btn');
-  var err = document.getElementById('reset-error');
-  var success = document.getElementById('reset-success');
-
-  err.style.display = 'none';
-  success.style.display = 'none';
-
-  if (!pw || pw.length < 6) {
-    err.textContent = 'Password must be at least 6 characters';
-    err.style.display = 'block';
-    return;
-  }
-  if (pw !== confirm) {
-    err.textContent = 'Passwords do not match';
-    err.style.display = 'block';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Updating...';
-
-  var { error } = await sb.auth.updateUser({ password: pw });
-
-  if (error) {
-    err.textContent = error.message;
-    err.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Set Password';
-    return;
-  }
-
-  success.textContent = 'Password updated! Redirecting to dashboard...';
-  success.style.display = 'block';
-  btn.style.display = 'none';
-
-  setTimeout(function() {
-    window.location.hash = '';
-    window.location.reload();
-  }, 1500);
-}
-
-document.getElementById('reset-confirm').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') handleResetPassword();
-});
-
-// ============================================
-// INIT
-// ============================================
-async function init() {
-  var isReset = await checkForPasswordReset();
-  if (!isReset) {
-    await checkSession();
-  }
-}
+async function init(){var isReset=await checkForPasswordReset();if(!isReset)await checkSession()}
 init();
 </script>
 </body>
