@@ -340,12 +340,39 @@ document.getElementById('inv-tbody').innerHTML=invoiceable.map(function(l){var v
 function openInvoiceModal(sessionId,name,email){invoiceSessionId=sessionId;document.getElementById('inv-modal-name').value=decodeURIComponent(name);document.getElementById('inv-modal-email').value=decodeURIComponent(email);document.getElementById('inv-modal-amount').value='';document.getElementById('inv-modal-desc').value='Event deposit';document.getElementById('invoice-modal').classList.add('show')}
 function closeInvoiceModal(){document.getElementById('invoice-modal').classList.remove('show');invoiceSessionId=null}
 
-async function sendInvoice(){var amount=parseFloat(document.getElementById('inv-modal-amount').value);var desc=document.getElementById('inv-modal-desc').value||'Event deposit';if(!amount||amount<=0){showToast('Please enter a valid amount','error');return}
-// Update Supabase with deposit info
-var{error}=await sb.from('leads').update({deposit_sent:true,deposit_amount:amount,deposit_sent_at:new Date().toISOString()}).eq('session_id',invoiceSessionId);if(error){showToast('Error saving: '+error.message,'error');return}
-// TODO: Call n8n webhook to create Stripe invoice
-// For now, just mark as sent in Supabase
-showToast('Invoice for $'+amount.toLocaleString()+' marked as sent!','success');closeInvoiceModal();loadInvoices()}
+async function sendInvoice(){
+  var amount=parseFloat(document.getElementById('inv-modal-amount').value);
+  var desc=document.getElementById('inv-modal-desc').value||'Event deposit';
+  var email=document.getElementById('inv-modal-email').value;
+  var name=document.getElementById('inv-modal-name').value;
+  if(!amount||amount<=0){showToast('Please enter a valid amount','error');return}
+  showToast('Sending invoice...','success');
+  try {
+    var res = await fetch('https://zentrust.app.n8n.cloud/webhook/send-invoice', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email: email,
+        name: name,
+        amount: amount,
+        description: desc,
+        session_id: invoiceSessionId
+      })
+    });
+    var data = await res.json();
+    if (!data.success) throw new Error('Stripe error');
+    await sb.from('leads').update({
+      deposit_sent: true,
+      deposit_amount: amount,
+      deposit_sent_at: new Date().toISOString()
+    }).eq('session_id', invoiceSessionId);
+    showToast('Invoice for $'+amount.toLocaleString()+' sent!','success');
+    closeInvoiceModal();
+    loadInvoices();
+  } catch(e) {
+    showToast('Error sending invoice: '+e.message,'error');
+  }
+}
 
 async function markDepositPaid(sessionId){var{error}=await sb.from('leads').update({deposit_paid:true,deposit_paid_at:new Date().toISOString()}).eq('session_id',sessionId);if(error){showToast('Error: '+error.message,'error')}else{showToast('Deposit marked as paid!','success');loadInvoices()}}
 
