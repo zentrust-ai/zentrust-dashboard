@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d1117;--surface:#131b2e;--card:#1a2236;--border:rgba(255,255,255,0.06);--accent:#3a9fb0;--accent-soft:rgba(58,159,176,0.12);--green:#4ade80;--green-soft:rgba(74,222,128,0.12);--amber:#f59e0b;--amber-soft:rgba(245,158,11,0.12);--red:#ef4444;--red-soft:rgba(239,68,68,0.12);--blue:#3b82f6;--blue-soft:rgba(59,130,246,0.12);--text:rgba(255,255,255,0.9);--text-secondary:rgba(255,255,255,0.5);--text-dim:rgba(255,255,255,0.25);--font:'Outfit',-apple-system,sans-serif}
+:root{--bg:#0d1117;--surface:#131b2e;--card:#1a2236;--border:rgba(255,255,255,0.06);--accent:#3a9fb0;--accent-soft:rgba(58,159,176,0.12);--green:#4ade80;--green-soft:rgba(74,222,128,0.12);--amber:#f59e0b;--amber-soft:rgba(245,158,11,0.12);--red:#ef4444;--red-soft:rgba(239,68,68,0.12);--blue:#3b82f6;--blue-soft:rgba(59,130,246,0.12);--purple:#a78bfa;--purple-soft:rgba(167,139,250,0.12);--text:rgba(255,255,255,0.9);--text-secondary:rgba(255,255,255,0.5);--text-dim:rgba(255,255,255,0.25);--font:'Outfit',-apple-system,sans-serif}
 html,body{height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
@@ -41,7 +41,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .venue-selector select:focus{border-color:var(--accent)}
 .venue-selector select option{background:var(--surface);color:var(--text)}
 .main{margin-left:220px;padding:32px}
-.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:16px}
 .page-title{font-size:22px;font-weight:600}
 .page-venue{font-size:13px;color:var(--text-secondary);margin-top:4px}
 .header-badge{font-size:11px;font-weight:500;padding:6px 14px;border-radius:6px;background:var(--green-soft);color:var(--green);text-transform:uppercase;letter-spacing:0.5px}
@@ -68,7 +68,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .funnel-step-value{font-size:15px;font-weight:600}
 .funnel-step-pct{font-size:11px;color:var(--text-dim);margin-left:6px}
 .table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table-header{padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.table-header{padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px}
 .table-header h3{font-size:14px;font-weight:600}
 .table-count{font-size:12px;color:var(--text-dim)}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -80,10 +80,10 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .badge-amber{background:var(--amber-soft);color:var(--amber)}
 .badge-red{background:var(--red-soft);color:var(--red)}
 .badge-blue{background:var(--blue-soft);color:var(--blue)}
+.badge-purple{background:var(--purple-soft);color:var(--purple)}
 .badge-dim{background:rgba(255,255,255,0.04);color:var(--text-dim)}
 td.name-cell{color:var(--text);font-weight:500}
 .loading{display:flex;align-items:center;justify-content:center;min-height:200px;color:var(--text-dim);font-size:14px}
-/* Action buttons in tables */
 .action-btn{padding:5px 12px;border:none;border-radius:6px;font-size:10px;font-family:var(--font);font-weight:500;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px}
 .action-btn-accent{background:var(--accent);color:#fff}
 .action-btn-accent:hover{background:#4dbbc9}
@@ -91,12 +91,10 @@ td.name-cell{color:var(--text);font-weight:500}
 .action-btn-green:hover{background:#6af09a}
 .action-btn-outline{background:none;border:1px solid var(--border);color:var(--text-secondary)}
 .action-btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-/* Toast notification */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:100;transform:translateY(100px);opacity:0;transition:all 0.3s}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{border-color:var(--green)}
 .toast.error{border-color:var(--red)}
-/* Invoice modal */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:50;display:none;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:420px;max-width:90%}
@@ -107,6 +105,53 @@ td.name-cell{color:var(--text);font-weight:500}
 .modal-field input:focus,.modal-field select:focus{border-color:var(--accent)}
 .modal-actions{display:flex;gap:10px;margin-top:20px}
 .modal-actions button{flex:1;padding:12px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s}
+
+/* ======= NEW: Filter controls ======= */
+.filters-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.filter-search{flex:1;min-width:220px;position:relative}
+.filter-search input{width:100%;padding:10px 14px 10px 38px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-family:var(--font);font-size:13px;color:var(--text);outline:none;transition:border-color 0.2s}
+.filter-search input:focus{border-color:var(--accent)}
+.filter-search input::placeholder{color:var(--text-dim)}
+.filter-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-dim)}
+.filter-select{padding:10px 32px 10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:border-color 0.2s}
+.filter-select:focus,.filter-select:hover{border-color:var(--accent)}
+.filter-select option{background:var(--surface);color:var(--text)}
+.date-type-toggle{display:inline-flex;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px}
+.date-type-toggle button{padding:7px 12px;background:none;border:none;border-radius:7px;font-family:var(--font);font-size:11px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px}
+.date-type-toggle button.active{background:var(--accent-soft);color:var(--accent)}
+.filter-clear{padding:10px 14px;background:none;border:1px solid var(--border);border-radius:10px;font-family:var(--font);font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all 0.15s}
+.filter-clear:hover{border-color:var(--red);color:var(--red)}
+.empty-state{padding:48px 24px;text-align:center;color:var(--text-dim);font-size:13px}
+
+/* ======= NEW: Follow-up tracker styles ======= */
+.tracker-compact{display:inline-flex;align-items:center;gap:6px;padding:4px 0}
+.tracker-compact .tc-step{display:flex;align-items:center;gap:5px}
+.tracker-compact .tc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;position:relative}
+.tracker-compact .tc-dot.done{background:var(--green);box-shadow:0 0 0 2px rgba(74,222,128,0.15)}
+.tracker-compact .tc-dot.current{background:var(--accent);box-shadow:0 0 0 3px rgba(58,159,176,0.25);animation:pulseDot 2s infinite ease-in-out}
+.tracker-compact .tc-dot.next{background:transparent;border:1.5px solid var(--text-dim)}
+.tracker-compact .tc-dot.skipped{background:var(--red-soft);border:1px solid rgba(239,68,68,0.3)}
+.tracker-compact .tc-label{font-size:10.5px;color:var(--text-secondary);font-weight:500;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
+.tracker-compact .tc-label.done{color:var(--green)}
+.tracker-compact .tc-label.current{color:var(--accent)}
+.tracker-compact .tc-label.next{color:var(--text-dim)}
+.tracker-compact .tc-sep{color:var(--text-dim);font-size:12px;margin:0 2px}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 3px rgba(58,159,176,0.25)}50%{box-shadow:0 0 0 5px rgba(58,159,176,0.15)}}
+
+.view-full-btn{padding:4px 10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-size:10px;font-family:var(--font);font-weight:500;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px}
+.view-full-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+.tree-row{background:rgba(0,0,0,0.2)}
+.tree-row td{padding:0}
+.tree-container{padding:24px 32px 28px;animation:expandDown 0.25s ease}
+@keyframes expandDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.tree-title{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px}
+.tree-svg-wrap{overflow-x:auto;padding-bottom:6px}
+.tree-svg-wrap svg{min-width:820px}
+.tree-svg-wrap::-webkit-scrollbar{height:6px}
+.tree-svg-wrap::-webkit-scrollbar-track{background:transparent}
+.tree-svg-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px}
+
 @media(max-width:1024px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:20px}.metrics-grid{grid-template-columns:1fr 1fr}}
 </style>
@@ -115,7 +160,7 @@ td.name-cell{color:var(--text);font-weight:500}
 <div class="login-page" id="login-page">
   <div class="login-box">
     <div class="login-logo">ZENI</div>
-    <div class="login-sub">Dashboard — Powered by Zentrust</div>
+    <div class="login-sub">Dashboard &mdash; Powered by Zentrust</div>
     <input class="login-input" type="email" id="login-email" placeholder="Email address">
     <input class="login-input" type="password" id="login-password" placeholder="Password">
     <button class="login-btn" id="login-btn" onclick="handleLogin()">Sign In</button>
@@ -164,8 +209,8 @@ td.name-cell{color:var(--text);font-weight:500}
       </button>
     </div>
     <div class="sidebar-bottom">
-      <div class="sidebar-user" id="user-email">—</div>
-      <div class="sidebar-role" id="user-role">—</div>
+      <div class="sidebar-user" id="user-email">&mdash;</div>
+      <div class="sidebar-role" id="user-role">&mdash;</div>
       <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
     </div>
   </div>
@@ -175,16 +220,16 @@ td.name-cell{color:var(--text);font-weight:500}
     <div id="page-overview">
       <div class="page-header"><div><div class="page-title">Overview</div><div class="page-venue" id="venue-name">Loading...</div></div><div class="header-badge" id="status-badge">Live</div></div>
       <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr);">
-        <div class="metric-card"><div class="metric-label">Total Leads</div><div class="metric-value" id="m-total-leads">—</div><div class="metric-sub">All time</div></div>
-        <div class="metric-card"><div class="metric-label label-accent">Tours Booked</div><div class="metric-value" id="m-tours-booked">—</div><div class="metric-sub" id="m-lead-to-tour">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="m-events-booked">—</div><div class="metric-sub" id="m-conversion-rate">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Zeni Revenue</div><div class="metric-value" id="m-revenue">—</div><div class="metric-sub" id="m-avg-revenue">—</div></div>
-        <div class="metric-card"><div class="metric-label label-amber">SMS Opt-ins</div><div class="metric-value" id="m-sms-optins">—</div><div class="metric-sub" id="m-followup-optins">—</div></div>
+        <div class="metric-card"><div class="metric-label">Total Leads</div><div class="metric-value" id="m-total-leads">&mdash;</div><div class="metric-sub">All time</div></div>
+        <div class="metric-card"><div class="metric-label label-accent">Tours Booked</div><div class="metric-value" id="m-tours-booked">&mdash;</div><div class="metric-sub" id="m-lead-to-tour">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="m-events-booked">&mdash;</div><div class="metric-sub" id="m-conversion-rate">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Zeni Revenue</div><div class="metric-value" id="m-revenue">&mdash;</div><div class="metric-sub" id="m-avg-revenue">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-amber">SMS Opt-ins</div><div class="metric-value" id="m-sms-optins">&mdash;</div><div class="metric-sub" id="m-followup-optins">&mdash;</div></div>
       </div>
       <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
-        <div class="metric-card"><div class="metric-label label-accent">Deposits Sent</div><div class="metric-value" id="m-dep-sent">—</div><div class="metric-sub">Invoices sent to leads</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Deposits Collected</div><div class="metric-value" id="m-dep-paid">—</div><div class="metric-sub" id="m-dep-rate">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Deposit Revenue</div><div class="metric-value" id="m-dep-amount">—</div><div class="metric-sub">Total collected via Zeni</div></div>
+        <div class="metric-card"><div class="metric-label label-accent">Deposits Sent</div><div class="metric-value" id="m-dep-sent">&mdash;</div><div class="metric-sub">Invoices sent to leads</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Deposits Collected</div><div class="metric-value" id="m-dep-paid">&mdash;</div><div class="metric-sub" id="m-dep-rate">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Deposit Revenue</div><div class="metric-value" id="m-dep-amount">&mdash;</div><div class="metric-sub">Total collected via Zeni</div></div>
       </div>
       <div class="two-col">
         <div class="chart-card"><div class="chart-title">Conversations Per Day <span>Last 30 days</span></div><div class="chart-area" id="chart-leads"></div></div>
@@ -192,65 +237,116 @@ td.name-cell{color:var(--text);font-weight:500}
       </div>
     </div>
 
-    <!-- LEADS -->
+    <!-- LEADS (simplified: name/email/phone/status/created + filters) -->
     <div id="page-leads" style="display:none;">
       <div class="page-header"><div><div class="page-title">Leads</div><div class="page-venue">All captured leads</div></div></div>
+      <div class="filters-bar">
+        <div class="filter-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="leads-search" placeholder="Search by name, email, or phone..." oninput="applyLeadFilters()">
+        </div>
+        <div class="date-type-toggle" id="leads-date-toggle">
+          <button class="active" data-date-type="created" onclick="toggleDateType(this)">Created</button>
+          <button data-date-type="tour" onclick="toggleDateType(this)">Tour Date</button>
+        </div>
+        <select class="filter-select" id="leads-month-filter" onchange="applyLeadFilters()">
+          <option value="">All months</option>
+        </select>
+        <select class="filter-select" id="leads-status-filter" onchange="applyLeadFilters()">
+          <option value="">All statuses</option>
+          <option value="new">New</option>
+          <option value="qualified">Qualified</option>
+          <option value="tour_scheduled">Tour Booked</option>
+          <option value="tour_attended">Attended</option>
+          <option value="no_show">No-Show</option>
+          <option value="event_booked">Event Booked</option>
+          <option value="post_tour">Post-Tour</option>
+          <option value="cold_nurture">Cold Nurture</option>
+          <option value="final_checkin">Final Check-In</option>
+          <option value="expired">Expired</option>
+        </select>
+        <button class="filter-clear" onclick="clearLeadFilters()">Clear</button>
+      </div>
       <div class="table-card">
-        <div class="table-header"><h3>Recent Leads</h3><div class="table-count" id="leads-count">—</div></div>
+        <div class="table-header"><h3>Recent Leads</h3><div class="table-count" id="leads-count">&mdash;</div></div>
         <div style="overflow-x:auto;">
-          <table><thead><tr><th>Venue</th><th>Name</th><th>Email</th><th>Phone</th><th>Event Date</th><th>Guests</th><th>Tour</th><th>Tour Date</th><th>Status</th><th>Created</th></tr></thead><tbody id="leads-tbody"></tbody></table>
+          <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Created</th></tr></thead><tbody id="leads-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- REVENUE TRACKER -->
+    <!-- REVENUE TRACKER (unchanged) -->
     <div id="page-revenue" style="display:none;">
       <div class="page-header"><div><div class="page-title">Revenue Tracker</div><div class="page-venue">Mark events as booked and track revenue</div></div></div>
       <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
-        <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="rev-events">—</div><div class="metric-sub" id="rev-rate">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Total Revenue</div><div class="metric-value" id="rev-total">—</div><div class="metric-sub" id="rev-avg">—</div></div>
-        <div class="metric-card"><div class="metric-label label-accent">Pending</div><div class="metric-value" id="rev-pending">—</div><div class="metric-sub">Toured but not yet booked</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Events Booked</div><div class="metric-value" id="rev-events">&mdash;</div><div class="metric-sub" id="rev-rate">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Total Revenue</div><div class="metric-value" id="rev-total">&mdash;</div><div class="metric-sub" id="rev-avg">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-accent">Pending</div><div class="metric-value" id="rev-pending">&mdash;</div><div class="metric-sub">Toured but not yet booked</div></div>
       </div>
       <div class="table-card">
-        <div class="table-header"><h3>Tour Attended — Awaiting Event Booking</h3><div class="table-count" id="rev-count">—</div></div>
+        <div class="table-header"><h3>Tour Attended &mdash; Awaiting Event Booking</h3><div class="table-count" id="rev-count">&mdash;</div></div>
         <div style="overflow-x:auto;">
-          <table><thead><tr><th>Venue</th><th>Name</th><th>Email</th><th>Event Date</th><th>Guests</th><th>Tour Date</th><th>Status</th><th>Revenue</th><th>Action</th></tr></thead><tbody id="rev-tbody"></tbody></table>
+          <table><thead><tr><th>Name</th><th>Email</th><th>Event Date</th><th>Guests</th><th>Tour Date</th><th>Status</th><th>Revenue</th><th>Action</th></tr></thead><tbody id="rev-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- INVOICES -->
+    <!-- INVOICES (unchanged) -->
     <div id="page-invoices" style="display:none;">
       <div class="page-header"><div><div class="page-title">Invoices</div><div class="page-venue">Send deposit invoices to leads via Stripe</div></div></div>
       <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
-        <div class="metric-card"><div class="metric-label label-accent">Invoices Sent</div><div class="metric-value" id="inv-sent">—</div><div class="metric-sub">All time</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Paid</div><div class="metric-value" id="inv-paid">—</div><div class="metric-sub" id="inv-rate">—</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Collected</div><div class="metric-value" id="inv-amount">—</div><div class="metric-sub">Total deposits received</div></div>
+        <div class="metric-card"><div class="metric-label label-accent">Invoices Sent</div><div class="metric-value" id="inv-sent">&mdash;</div><div class="metric-sub">All time</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Paid</div><div class="metric-value" id="inv-paid">&mdash;</div><div class="metric-sub" id="inv-rate">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Collected</div><div class="metric-value" id="inv-amount">&mdash;</div><div class="metric-sub">Total deposits received</div></div>
       </div>
       <div class="table-card">
-        <div class="table-header"><h3>Leads Ready for Invoicing</h3><div class="table-count" id="inv-count">—</div></div>
+        <div class="table-header"><h3>Leads Ready for Invoicing</h3><div class="table-count" id="inv-count">&mdash;</div></div>
         <div style="overflow-x:auto;">
-          <table><thead><tr><th>Venue</th><th>Name</th><th>Email</th><th>Event Date</th><th>Guests</th><th>Deposit Status</th><th>Amount</th><th>Action</th></tr></thead><tbody id="inv-tbody"></tbody></table>
+          <table><thead><tr><th>Name</th><th>Email</th><th>Event Date</th><th>Guests</th><th>Deposit Status</th><th>Amount</th><th>Action</th></tr></thead><tbody id="inv-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- FOLLOW-UPS -->
+    <!-- FOLLOW-UPS (redesigned: stats + per-lead trackers) -->
     <div id="page-followups" style="display:none;">
-      <div class="page-header"><div><div class="page-title">Follow-up Stats</div><div class="page-venue">Email & SMS automation performance</div></div></div>
-      <div class="metrics-grid" id="followup-metrics"></div>
+      <div class="page-header"><div><div class="page-title">Follow-up Stats</div><div class="page-venue">Email &amp; SMS automation performance</div></div></div>
+      <div class="metrics-grid" id="followup-metrics" style="margin-bottom:28px"></div>
+
+      <div class="filters-bar">
+        <div class="filter-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="fu-search" placeholder="Search leads..." oninput="applyFollowupFilters()">
+        </div>
+        <select class="filter-select" id="fu-status-filter" onchange="applyFollowupFilters()">
+          <option value="">All stages</option>
+          <option value="tour_scheduled">Tour Booked</option>
+          <option value="tour_attended">Attended</option>
+          <option value="no_show">No-Show</option>
+          <option value="post_tour">Post-Tour</option>
+          <option value="cold_nurture">Cold Nurture</option>
+          <option value="final_checkin">Final Check-In</option>
+          <option value="expired">Expired</option>
+        </select>
+        <button class="filter-clear" onclick="clearFollowupFilters()">Clear</button>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h3>Lead Follow-up Progress</h3><div class="table-count" id="fu-count">&mdash;</div></div>
+        <div style="overflow-x:auto;">
+          <table><thead><tr><th>Name</th><th>Email</th><th>Tour Date</th><th>Progress</th><th></th></tr></thead><tbody id="fu-tbody"></tbody></table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- INVOICE MODAL -->
+<!-- INVOICE MODAL (unchanged) -->
 <div class="modal-overlay" id="invoice-modal">
   <div class="modal">
     <h3>Send Deposit Invoice</h3>
     <div class="modal-field"><label>Lead</label><input type="text" id="inv-modal-name" disabled></div>
     <div class="modal-field"><label>Email</label><input type="text" id="inv-modal-email" disabled></div>
     <div class="modal-field"><label>Deposit Amount ($)</label><input type="number" id="inv-modal-amount" placeholder="500.00" min="1" step="0.01"></div>
-    <div class="modal-field"><label>Description</label><input type="text" id="inv-modal-desc" placeholder="Event deposit — The Grand Manor"></div>
+    <div class="modal-field"><label>Description</label><input type="text" id="inv-modal-desc" placeholder="Event deposit"></div>
     <div class="modal-actions">
       <button onclick="closeInvoiceModal()" style="background:none;border:1px solid var(--border);color:var(--text-secondary)">Cancel</button>
       <button onclick="sendInvoice()" style="background:var(--accent);color:#fff;border:none">Send Invoice</button>
@@ -258,18 +354,21 @@ td.name-cell{color:var(--text);font-weight:500}
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 const SUPABASE_URL='https://wjwjylmixdwkxpraykyf.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqd2p5bG1peGR3a3hwcmF5a3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzUxNTUsImV4cCI6MjA4ODA1MTE1NX0.fDNNnmqpHijSfKOZqDiIzgR0_3xx7ZiCSc-xVuqOvBg';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-let currentUser=null,userRole=null,userVenueId=null,selectedVenue='all',venueMap={};
-let invoiceSessionId=null;
+var currentUser=null,userRole=null,userVenueId=null,selectedVenue='all',venueMap={};
+var invoiceSessionId=null;
+// Caches for filtering without re-fetching
+var _leadsCache=[],_fuLeadsCache=[];
+var _leadsDateType='created';
 
 function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'success')+' show';setTimeout(function(){t.className='toast'},3000)}
 
+// ============ AUTH ============
 async function checkSession(){const{data:{session}}=await sb.auth.getSession();if(session){currentUser=session.user;await loadUserRole();showApp()}}
 async function handleLogin(){const email=document.getElementById('login-email').value.trim(),password=document.getElementById('login-password').value,btn=document.getElementById('login-btn'),err=document.getElementById('login-error');if(!email||!password){err.textContent='Please enter email and password';err.style.display='block';return}btn.disabled=true;btn.textContent='Signing in...';err.style.display='none';const{data,error}=await sb.auth.signInWithPassword({email,password});if(error){err.textContent=error.message;err.style.display='block';btn.disabled=false;btn.textContent='Sign In';return}currentUser=data.user;await loadUserRole();showApp()}
 async function handleLogout(){await sb.auth.signOut();currentUser=null;userRole=null;userVenueId=null;document.getElementById('app').style.display='none';document.getElementById('login-page').style.display='flex'}
@@ -282,9 +381,7 @@ function onVenueChange(){selectedVenue=document.getElementById('venue-select').v
 
 function showPage(page,el){document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active')});if(el)el.classList.add('active');else{var btn=document.querySelector('[data-page="'+page+'"]');if(btn)btn.classList.add('active')}document.querySelectorAll('[id^="page-"]').forEach(function(p){p.style.display='none'});document.getElementById('page-'+page).style.display='block';if(page==='overview')loadOverview();else if(page==='leads')loadLeads();else if(page==='revenue')loadRevenue();else if(page==='invoices')loadInvoices();else if(page==='followups')loadFollowups()}
 
-// ============================================
-// OVERVIEW
-// ============================================
+// ============ OVERVIEW (unchanged) ============
 async function loadOverview(){const{data:metrics,error}=await sb.from('dashboard_metrics').select('*');if(error||!metrics||!metrics.length){document.getElementById('venue-name').textContent='No data available';return}var filtered=metrics;if(selectedVenue!=='all')filtered=metrics.filter(function(v){return v.venue_id===selectedVenue});if(!filtered.length){document.getElementById('venue-name').textContent='No data for selected venue';return}var m;if(filtered.length>1){m={venue_name:'All Venues ('+filtered.length+')',total_leads:filtered.reduce(function(s,v){return s+(v.total_leads||0)},0),tours_booked:filtered.reduce(function(s,v){return s+(v.tours_booked||0)},0),events_booked:filtered.reduce(function(s,v){return s+(v.events_booked||0)},0),tours_attended:filtered.reduce(function(s,v){return s+(v.tours_attended||0)},0),tours_no_show:filtered.reduce(function(s,v){return s+(v.tours_no_show||0)},0),followup_optins:filtered.reduce(function(s,v){return s+(v.followup_optins||0)},0),sms_optins:filtered.reduce(function(s,v){return s+(v.sms_optins||0)},0),total_revenue:filtered.reduce(function(s,v){return s+(parseFloat(v.total_revenue)||0)},0),reminders_sent:filtered.reduce(function(s,v){return s+(v.reminders_sent||0)},0),attendance_checks_sent:filtered.reduce(function(s,v){return s+(v.attendance_checks_sent||0)},0),post_tour_emails_sent:filtered.reduce(function(s,v){return s+(v.post_tour_emails_sent||0)},0),nurture_emails_sent:filtered.reduce(function(s,v){return s+(v.nurture_emails_sent||0)},0),unsubscribed:filtered.reduce(function(s,v){return s+(v.unsubscribed||0)},0),deposits_sent:filtered.reduce(function(s,v){return s+(v.deposits_sent||0)},0),deposits_paid:filtered.reduce(function(s,v){return s+(v.deposits_paid||0)},0),deposits_collected:filtered.reduce(function(s,v){return s+(parseFloat(v.deposits_collected)||0)},0)};m.lead_to_tour_rate=m.total_leads>0?((m.tours_booked/m.total_leads)*100).toFixed(1):0;m.event_booking_rate=m.tours_booked>0?((m.events_booked/m.tours_booked)*100).toFixed(1):0}else{m=filtered[0]}
 document.getElementById('venue-name').textContent=m.venue_name;document.getElementById('m-total-leads').textContent=m.total_leads;document.getElementById('m-tours-booked').textContent=m.tours_booked;document.getElementById('m-lead-to-tour').textContent=m.lead_to_tour_rate+'% lead \u2192 tour';document.getElementById('m-events-booked').textContent=m.events_booked;document.getElementById('m-conversion-rate').textContent=m.event_booking_rate+'% tour \u2192 event';document.getElementById('m-sms-optins').textContent=m.sms_optins||0;document.getElementById('m-followup-optins').textContent=(m.followup_optins||0)+' email opt-ins';
 var rev=parseFloat(m.total_revenue)||0;document.getElementById('m-revenue').textContent='$'+rev.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});var avgRev=m.events_booked>0?Math.round(rev/m.events_booked):0;document.getElementById('m-avg-revenue').textContent=avgRev>0?'$'+avgRev.toLocaleString()+' avg per event':'No events yet';
@@ -293,6 +390,7 @@ var funnel=[{label:'Total Leads',value:m.total_leads,color:'var(--accent)'},{lab
 
 async function loadChart(){var thirtyDaysAgo=new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];var query=sb.from('leads_by_date').select('*').gte('lead_date',thirtyDaysAgo).order('lead_date',{ascending:true});if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data}=await query;var chartEl=document.getElementById('chart-leads');if(!data||!data.length){chartEl.innerHTML='<div class="loading">No data in the last 30 days</div>';return}var chartData;if(selectedVenue==='all'){var byDate={};data.forEach(function(d){if(!byDate[d.lead_date])byDate[d.lead_date]=0;byDate[d.lead_date]+=d.lead_count});chartData=Object.keys(byDate).sort().map(function(k){return{lead_date:k,lead_count:byDate[k]}})}else{chartData=data}var W=680,H=180,padL=36,padR=16,padT=16,padB=32;var maxVal=Math.max.apply(null,chartData.map(function(d){return d.lead_count}).concat([1]));var plotW=W-padL-padR,plotH=H-padT-padB;var step=chartData.length>1?plotW/(chartData.length-1):plotW;var points=chartData.map(function(d,i){return{x:padL+(chartData.length>1?i*step:plotW/2),y:padT+plotH-(d.lead_count/maxVal)*plotH,count:d.lead_count,date:d.lead_date}});var linePath=points.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)}).join(' ');var areaPath=linePath+' L'+points[points.length-1].x.toFixed(1)+','+(padT+plotH)+' L'+points[0].x.toFixed(1)+','+(padT+plotH)+' Z';var yLabels='';for(var yi=0;yi<=4;yi++){var yVal=Math.round(maxVal*(yi/4)),yPos=padT+plotH-(yi/4)*plotH;yLabels+='<text x="'+(padL-8)+'" y="'+(yPos+3)+'" text-anchor="end" fill="rgba(255,255,255,0.2)" font-size="9">'+yVal+'</text><line x1="'+padL+'" y1="'+yPos+'" x2="'+(W-padR)+'" y2="'+yPos+'" stroke="rgba(255,255,255,0.04)"/>'}var xLabels='',labelStep=Math.max(1,Math.floor(chartData.length/6));for(var xi=0;xi<chartData.length;xi+=labelStep){var lbl=new Date(chartData[xi].lead_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});xLabels+='<text x="'+points[xi].x+'" y="'+(H-6)+'" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="9">'+lbl+'</text>'}var dots=points.map(function(p){var lbl=new Date(p.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});return'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.5" fill="var(--accent)" stroke="var(--card)" stroke-width="2"><title>'+lbl+': '+p.count+' conversations</title></circle>'}).join('');chartEl.innerHTML='<div class="line-chart"><svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;font-family:Outfit,sans-serif;">'+yLabels+xLabels+'<defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0.01"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#areaFill)"/><path d="'+linePath+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'</svg></div>'}
 
+// ============ LEADS ACTIONS (unchanged) ============
 async function updateLeadStatus(sessionId, status) {
   var updates = {};
   if (status === 'new') { updates = { lead_status: 'new', tour_booked: false, tour_attended: null, event_booked: false }; }
@@ -313,29 +411,133 @@ async function saveTourDate(sessionId, input) {
   else { input.style.borderColor = 'var(--green)'; showToast('Tour date updated!', 'success'); setTimeout(function(){ input.style.borderColor = 'rgba(255,255,255,0.1)' }, 1500); }
 }
 
-// ============================================
-// LEADS TABLE (Tour Date replaces Revenue)
-// ============================================
-async function loadLeads(){var query=sb.from('recent_leads').select('*').limit(100);if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data:leads,error}=await query;if(error||!leads){document.getElementById('leads-tbody').innerHTML='<tr><td colspan="10" class="loading">Error loading leads</td></tr>';return}document.getElementById('leads-count').textContent=leads.length+' leads';document.getElementById('leads-tbody').innerHTML=leads.map(function(l){var phone=l.phone?'('+l.phone.slice(0,3)+') '+l.phone.slice(3,6)+'-'+l.phone.slice(6):'\u2014';var created=l.created_at?new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014';var venueName=venueMap[l.venue_id]||l.venue_id||'\u2014';var statusBadge='<select onchange="updateLeadStatus(\''+l.session_id+'\',this.value)" style="padding:4px 8px;border-radius:6px;font-size:10px;font-weight:600;font-family:Outfit,sans-serif;cursor:pointer;outline:none;border:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;'+(l.event_booked?'background:var(--green-soft);color:var(--green)':l.tour_attended===true?'background:var(--blue-soft);color:var(--blue)':l.tour_attended===false?'background:var(--red-soft);color:var(--red)':l.tour_booked?'background:var(--amber-soft);color:var(--amber)':'background:rgba(255,255,255,0.04);color:var(--text-dim)')+'">'+'<option value="new"'+((!l.tour_booked&&!l.event_booked&&l.lead_status!=='qualified')?' selected':'')+'>New</option>'+'<option value="qualified"'+((!l.tour_booked&&!l.event_booked&&l.lead_status==='qualified')?' selected':'')+'>Qualified</option>'+'<option value="tour_booked"'+((l.tour_booked&&!l.tour_attended&&l.tour_attended!==false&&!l.event_booked)?' selected':'')+'>Tour Booked</option>'+'<option value="attended"'+((l.tour_attended===true&&!l.event_booked)?' selected':'')+'>Attended</option>'+'<option value="no_show"'+((l.tour_attended===false)?' selected':'')+'>No-Show</option>'+'<option value="event_booked"'+((l.event_booked)?' selected':'')+'>Event Booked</option>'+'</select>';;var tourBadge=l.tour_booked?'<span class="badge badge-green">Yes</span>':'<span class="badge badge-dim">No</span>';return'<tr><td style="font-size:11px;color:var(--accent)">'+venueName+'</td><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+phone+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+tourBadge+'</td><td><input type="text" value="'+(l.tour_date||'')+'" placeholder="e.g. Apr 3 at 2 PM" style="width:130px;padding:5px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:11px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none" onkeypress="if(event.key===\'Enter\')saveTourDate(\''+l.session_id+'\',this)" onblur="saveTourDate(\''+l.session_id+'\',this)"></td><td>'+statusBadge+'</td><td>'+created+'</td></tr>'}).join('')}
 
-// ============================================
-// REVENUE TRACKER
-// ============================================
+// ============ NEW: LEADS PAGE (simplified + filters) ============
+async function loadLeads(){
+  var query=sb.from('recent_leads').select('*').limit(500);
+  if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);
+  var{data:leads,error}=await query;
+  if(error||!leads){document.getElementById('leads-tbody').innerHTML='<tr><td colspan="5" class="empty-state">Error loading leads</td></tr>';return}
+  _leadsCache=leads;
+  buildMonthFilterOptions('leads-month-filter',leads,_leadsDateType);
+  applyLeadFilters();
+}
+
+function buildMonthFilterOptions(selectId,leads,dateType){
+  var sel=document.getElementById(selectId);
+  var currentVal=sel.value;
+  var months={};
+  leads.forEach(function(l){
+    var dateStr=dateType==='tour'?l.tour_date:l.created_at;
+    if(!dateStr)return;
+    var d;
+    if(dateType==='tour'){
+      // tour_date is free-form text like "Apr 21 At 10:00 Am" - parse loosely
+      var m=dateStr.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
+      if(!m)return;
+      var monthMap={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+      var monthIdx=monthMap[m[1].toLowerCase().substr(0,3)];
+      if(monthIdx===undefined)return;
+      var yearMatch=dateStr.match(/20\d\d/);
+      var year=yearMatch?parseInt(yearMatch[0]):new Date().getFullYear();
+      d=new Date(year,monthIdx,1);
+    } else {
+      d=new Date(dateStr);
+    }
+    if(isNaN(d.getTime()))return;
+    var key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    var label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    months[key]=label;
+  });
+  var sorted=Object.keys(months).sort().reverse();
+  sel.innerHTML='<option value="">All months</option>'+sorted.map(function(k){return'<option value="'+k+'"'+(k===currentVal?' selected':'')+'>'+months[k]+'</option>'}).join('');
+}
+
+function toggleDateType(btn){
+  document.querySelectorAll('#leads-date-toggle button').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  _leadsDateType=btn.getAttribute('data-date-type');
+  buildMonthFilterOptions('leads-month-filter',_leadsCache,_leadsDateType);
+  applyLeadFilters();
+}
+
+function applyLeadFilters(){
+  var search=(document.getElementById('leads-search').value||'').toLowerCase().trim();
+  var month=document.getElementById('leads-month-filter').value;
+  var status=document.getElementById('leads-status-filter').value;
+  var filtered=_leadsCache.filter(function(l){
+    if(search){
+      var nameMatch=(l.name||'').toLowerCase().indexOf(search)>-1;
+      var emailMatch=(l.email||'').toLowerCase().indexOf(search)>-1;
+      var phoneMatch=(l.phone||'').toLowerCase().indexOf(search)>-1;
+      if(!nameMatch&&!emailMatch&&!phoneMatch)return false;
+    }
+    if(status){
+      var ls=l.lead_status||'';
+      if(ls!==status)return false;
+    }
+    if(month){
+      var dateStr=_leadsDateType==='tour'?l.tour_date:l.created_at;
+      if(!dateStr)return false;
+      var monthKey;
+      if(_leadsDateType==='tour'){
+        var m=dateStr.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
+        if(!m)return false;
+        var monthMap={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+        var monthIdx=monthMap[m[1].toLowerCase().substr(0,3)];
+        var yearMatch=dateStr.match(/20\d\d/);
+        var year=yearMatch?parseInt(yearMatch[0]):new Date().getFullYear();
+        monthKey=year+'-'+String(monthIdx+1).padStart(2,'0');
+      } else {
+        var d=new Date(dateStr);
+        if(isNaN(d.getTime()))return false;
+        monthKey=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      }
+      if(monthKey!==month)return false;
+    }
+    return true;
+  });
+  renderLeadsTable(filtered);
+}
+
+function clearLeadFilters(){
+  document.getElementById('leads-search').value='';
+  document.getElementById('leads-month-filter').value='';
+  document.getElementById('leads-status-filter').value='';
+  applyLeadFilters();
+}
+
+function renderLeadsTable(leads){
+  document.getElementById('leads-count').textContent=leads.length+' leads';
+  if(!leads.length){
+    document.getElementById('leads-tbody').innerHTML='<tr><td colspan="5" class="empty-state">No leads match your filters</td></tr>';
+    return;
+  }
+  document.getElementById('leads-tbody').innerHTML=leads.map(function(l){
+    var phone=l.phone?'('+l.phone.slice(0,3)+') '+l.phone.slice(3,6)+'-'+l.phone.slice(6):'\u2014';
+    var created=l.created_at?new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014';
+    var statusBadge='<select onchange="updateLeadStatus(\''+l.session_id+'\',this.value)" style="padding:4px 8px;border-radius:6px;font-size:10px;font-weight:600;font-family:Outfit,sans-serif;cursor:pointer;outline:none;border:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;'+(l.event_booked?'background:var(--green-soft);color:var(--green)':l.tour_attended===true?'background:var(--blue-soft);color:var(--blue)':l.tour_attended===false?'background:var(--red-soft);color:var(--red)':l.tour_booked?'background:var(--amber-soft);color:var(--amber)':'background:rgba(255,255,255,0.04);color:var(--text-dim)')+'">'+'<option value="new"'+((!l.tour_booked&&!l.event_booked&&l.lead_status!=='qualified')?' selected':'')+'>New</option>'+'<option value="qualified"'+((!l.tour_booked&&!l.event_booked&&l.lead_status==='qualified')?' selected':'')+'>Qualified</option>'+'<option value="tour_booked"'+((l.tour_booked&&!l.tour_attended&&l.tour_attended!==false&&!l.event_booked)?' selected':'')+'>Tour Booked</option>'+'<option value="attended"'+((l.tour_attended===true&&!l.event_booked)?' selected':'')+'>Attended</option>'+'<option value="no_show"'+((l.tour_attended===false)?' selected':'')+'>No-Show</option>'+'<option value="event_booked"'+((l.event_booked)?' selected':'')+'>Event Booked</option>'+'</select>';
+    return'<tr><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+phone+'</td><td>'+statusBadge+'</td><td>'+created+'</td></tr>';
+  }).join('');
+}
+
+
+// ============ REVENUE (venue column removed from render) ============
 async function loadRevenue(){var query=sb.from('recent_leads').select('*').limit(200);if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data:leads}=await query;if(!leads)leads=[];
 var toured=leads.filter(function(l){return l.tour_booked});var evBooked=leads.filter(function(l){return l.event_booked});var totalRev=evBooked.reduce(function(s,l){return s+(parseFloat(l.event_revenue)||0)},0);var pending=toured.filter(function(l){return l.tour_attended===true&&!l.event_booked});
-document.getElementById('rev-events').textContent=evBooked.length;document.getElementById('rev-rate').textContent=toured.length>0?Math.round(evBooked.length/toured.length*100)+'% of tours':'—';document.getElementById('rev-total').textContent='$'+totalRev.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});document.getElementById('rev-avg').textContent=evBooked.length>0?'$'+Math.round(totalRev/evBooked.length).toLocaleString()+' avg per event':'No events yet';document.getElementById('rev-pending').textContent=pending.length;document.getElementById('rev-count').textContent=pending.length+' leads';
-// Show all toured leads (attended or booked) for revenue entry
-var revLeads=leads.filter(function(l){return l.tour_booked&&(l.tour_attended===true||l.event_booked)});document.getElementById('rev-tbody').innerHTML=revLeads.map(function(l){var venueName=venueMap[l.venue_id]||l.venue_id||'\u2014';var statusBadge=l.event_booked?'<span class="badge badge-green">Event Booked</span>':'<span class="badge badge-blue">Attended</span>';var savedRev=l.event_revenue?'$'+parseFloat(l.event_revenue).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';var revInput='<div style="display:flex;align-items:center;gap:6px"><input type="text" id="rev-'+l.session_id+'" placeholder="$0.00" value="'+savedRev+'" style="width:100px;padding:6px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:12px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none" onfocus="if(this.value.startsWith(\'$\'))this.value=this.value.replace(/[$,]/g,\'\')" onblur="formatRevInput(this)" onkeypress="if(event.key===\'Enter\')saveRevenue(\''+l.session_id+'\')"><button onclick="saveRevenue(\''+l.session_id+'\')" class="action-btn action-btn-accent">Save</button></div>';var actionBtn=l.event_booked?'':'<button onclick="markEventBooked(\''+l.session_id+'\')" class="action-btn action-btn-green">Mark Booked</button>';return'<tr><td style="font-size:11px;color:var(--accent)">'+venueName+'</td><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+(l.tour_date||'\u2014')+'</td><td>'+statusBadge+'</td><td>'+revInput+'</td><td>'+actionBtn+'</td></tr>'}).join('')}
+document.getElementById('rev-events').textContent=evBooked.length;document.getElementById('rev-rate').textContent=toured.length>0?Math.round(evBooked.length/toured.length*100)+'% of tours':'\u2014';document.getElementById('rev-total').textContent='$'+totalRev.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});document.getElementById('rev-avg').textContent=evBooked.length>0?'$'+Math.round(totalRev/evBooked.length).toLocaleString()+' avg per event':'No events yet';document.getElementById('rev-pending').textContent=pending.length;document.getElementById('rev-count').textContent=pending.length+' leads';
+var revLeads=leads.filter(function(l){return l.tour_booked&&(l.tour_attended===true||l.event_booked)});
+if(!revLeads.length){document.getElementById('rev-tbody').innerHTML='<tr><td colspan="8" class="empty-state">No leads yet \u2014 waiting on tours to complete</td></tr>';return}
+document.getElementById('rev-tbody').innerHTML=revLeads.map(function(l){var statusBadge=l.event_booked?'<span class="badge badge-green">Event Booked</span>':'<span class="badge badge-blue">Attended</span>';var savedRev=l.event_revenue?'$'+parseFloat(l.event_revenue).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';var revInput='<div style="display:flex;align-items:center;gap:6px"><input type="text" id="rev-'+l.session_id+'" placeholder="$0.00" value="'+savedRev+'" style="width:100px;padding:6px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:12px;font-family:Outfit,sans-serif;color:rgba(255,255,255,0.9);outline:none" onfocus="if(this.value.startsWith(\'$\'))this.value=this.value.replace(/[$,]/g,\'\')" onblur="formatRevInput(this)" onkeypress="if(event.key===\'Enter\')saveRevenue(\''+l.session_id+'\')"><button onclick="saveRevenue(\''+l.session_id+'\')" class="action-btn action-btn-accent">Save</button></div>';var actionBtn=l.event_booked?'':'<button onclick="markEventBooked(\''+l.session_id+'\')" class="action-btn action-btn-green">Mark Booked</button>';return'<tr><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+(l.tour_date||'\u2014')+'</td><td>'+statusBadge+'</td><td>'+revInput+'</td><td>'+actionBtn+'</td></tr>'}).join('')}
 
 async function markEventBooked(sessionId){var{error}=await sb.from('leads').update({event_booked:true,event_booked_at:new Date().toISOString()}).eq('session_id',sessionId);if(error){showToast('Error: '+error.message,'error')}else{showToast('Event marked as booked!','success');loadRevenue();loadOverview()}}
 
-// ============================================
-// INVOICES
-// ============================================
+// ============ INVOICES (venue column removed from render) ============
 async function loadInvoices(){var query=sb.from('recent_leads').select('*').limit(200);if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data:leads}=await query;if(!leads)leads=[];
 var invoiceable=leads.filter(function(l){return l.tour_booked&&l.name&&l.email});var sent=leads.filter(function(l){return l.deposit_sent});var paid=leads.filter(function(l){return l.deposit_paid});var collected=paid.reduce(function(s,l){return s+(parseFloat(l.deposit_amount)||0)},0);
-document.getElementById('inv-sent').textContent=sent.length;document.getElementById('inv-paid').textContent=paid.length;document.getElementById('inv-rate').textContent=sent.length>0?Math.round(paid.length/sent.length*100)+'% paid':'—';document.getElementById('inv-amount').textContent='$'+collected.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});document.getElementById('inv-count').textContent=invoiceable.length+' leads';
-document.getElementById('inv-tbody').innerHTML=invoiceable.map(function(l){var venueName=venueMap[l.venue_id]||l.venue_id||'\u2014';var depStatus='';if(l.deposit_paid)depStatus='<span class="badge badge-green">Paid</span>';else if(l.deposit_sent)depStatus='<span class="badge badge-amber">Sent</span>';else depStatus='<span class="badge badge-dim">Not Sent</span>';var depAmt=l.deposit_amount?'$'+parseFloat(l.deposit_amount).toLocaleString('en-US',{minimumFractionDigits:2}):'\u2014';var actionBtn='';if(l.deposit_paid){actionBtn='<span style="color:var(--green);font-size:11px">\u2713 Paid</span>'}else if(l.deposit_sent){actionBtn='<button onclick="markDepositPaid(\''+l.session_id+'\')" class="action-btn action-btn-green">Mark Paid</button>'}else{actionBtn='<button onclick="openInvoiceModal(\''+l.session_id+'\',\''+encodeURIComponent(l.name||'')+'\',\''+encodeURIComponent(l.email||'')+'\')" class="action-btn action-btn-accent">Send Invoice</button>'}return'<tr><td style="font-size:11px;color:var(--accent)">'+venueName+'</td><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+depStatus+'</td><td>'+depAmt+'</td><td>'+actionBtn+'</td></tr>'}).join('')}
+document.getElementById('inv-sent').textContent=sent.length;document.getElementById('inv-paid').textContent=paid.length;document.getElementById('inv-rate').textContent=sent.length>0?Math.round(paid.length/sent.length*100)+'% paid':'\u2014';document.getElementById('inv-amount').textContent='$'+collected.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});document.getElementById('inv-count').textContent=invoiceable.length+' leads';
+if(!invoiceable.length){document.getElementById('inv-tbody').innerHTML='<tr><td colspan="7" class="empty-state">No leads ready for invoicing yet</td></tr>';return}
+document.getElementById('inv-tbody').innerHTML=invoiceable.map(function(l){var depStatus='';if(l.deposit_paid)depStatus='<span class="badge badge-green">Paid</span>';else if(l.deposit_sent)depStatus='<span class="badge badge-amber">Sent</span>';else depStatus='<span class="badge badge-dim">Not Sent</span>';var depAmt=l.deposit_amount?'$'+parseFloat(l.deposit_amount).toLocaleString('en-US',{minimumFractionDigits:2}):'\u2014';var actionBtn='';if(l.deposit_paid){actionBtn='<span style="color:var(--green);font-size:11px">\u2713 Paid</span>'}else if(l.deposit_sent){actionBtn='<button onclick="markDepositPaid(\''+l.session_id+'\')" class="action-btn action-btn-green">Mark Paid</button>'}else{actionBtn='<button onclick="openInvoiceModal(\''+l.session_id+'\',\''+encodeURIComponent(l.name||'')+'\',\''+encodeURIComponent(l.email||'')+'\')" class="action-btn action-btn-accent">Send Invoice</button>'}return'<tr><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+depStatus+'</td><td>'+depAmt+'</td><td>'+actionBtn+'</td></tr>'}).join('')}
 
 function openInvoiceModal(sessionId,name,email){invoiceSessionId=sessionId;document.getElementById('inv-modal-name').value=decodeURIComponent(name);document.getElementById('inv-modal-email').value=decodeURIComponent(email);document.getElementById('inv-modal-amount').value='';document.getElementById('inv-modal-desc').value='Event deposit';document.getElementById('invoice-modal').classList.add('show')}
 function closeInvoiceModal(){document.getElementById('invoice-modal').classList.remove('show');invoiceSessionId=null}
@@ -351,47 +553,277 @@ async function sendInvoice(){
     var res = await fetch('https://zentrust.app.n8n.cloud/webhook/send-invoice', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        email: email,
-        name: name,
-        amount: amount,
-        description: desc,
-        session_id: invoiceSessionId
-      })
+      body: JSON.stringify({email:email,name:name,amount:amount,description:desc,session_id:invoiceSessionId})
     });
     var data = await res.json();
     if (!data.success) throw new Error('Stripe error');
-    await sb.from('leads').update({
-      deposit_sent: true,
-      deposit_amount: amount,
-      deposit_sent_at: new Date().toISOString()
-    }).eq('session_id', invoiceSessionId);
+    await sb.from('leads').update({deposit_sent:true,deposit_amount:amount,deposit_sent_at:new Date().toISOString()}).eq('session_id',invoiceSessionId);
     showToast('Invoice for $'+amount.toLocaleString()+' sent!','success');
-    closeInvoiceModal();
-    loadInvoices();
-  } catch(e) {
-    showToast('Error sending invoice: '+e.message,'error');
-  }
+    closeInvoiceModal();loadInvoices();
+  } catch(e) { showToast('Error sending invoice: '+e.message,'error') }
 }
 
 async function markDepositPaid(sessionId){var{error}=await sb.from('leads').update({deposit_paid:true,deposit_paid_at:new Date().toISOString()}).eq('session_id',sessionId);if(error){showToast('Error: '+error.message,'error')}else{showToast('Deposit marked as paid!','success');loadInvoices()}}
 
-// ============================================
-// FOLLOW-UPS
-// ============================================
-async function loadFollowups(){var{data:metrics}=await sb.from('dashboard_metrics').select('*');if(!metrics||!metrics.length)return;var filtered=metrics;if(selectedVenue!=='all')filtered=metrics.filter(function(v){return v.venue_id===selectedVenue});if(!filtered.length)return;var m=filtered.length>1?{reminders_sent:filtered.reduce(function(s,v){return s+(v.reminders_sent||0)},0),attendance_checks_sent:filtered.reduce(function(s,v){return s+(v.attendance_checks_sent||0)},0),post_tour_emails_sent:filtered.reduce(function(s,v){return s+(v.post_tour_emails_sent||0)},0),nurture_emails_sent:filtered.reduce(function(s,v){return s+(v.nurture_emails_sent||0)},0),unsubscribed:filtered.reduce(function(s,v){return s+(v.unsubscribed||0)},0),followup_optins:filtered.reduce(function(s,v){return s+(v.followup_optins||0)},0),sms_optins:filtered.reduce(function(s,v){return s+(v.sms_optins||0)},0)}:filtered[0];
-document.getElementById('followup-metrics').innerHTML=[{label:'Tour Reminders Sent',value:m.reminders_sent,color:'var(--blue)'},{label:'Attendance Checks Sent',value:m.attendance_checks_sent,color:'var(--amber)'},{label:'Post-Tour Emails',value:m.post_tour_emails_sent,color:'var(--green)'},{label:'Nurture Emails',value:m.nurture_emails_sent,color:'var(--accent)'},{label:'Email Opt-ins',value:m.followup_optins,color:'var(--green)'},{label:'SMS Opt-ins',value:m.sms_optins||0,color:'var(--blue)'},{label:'Unsubscribed',value:m.unsubscribed,color:'var(--red)'}].map(function(s){return'<div class="metric-card"><div class="metric-label" style="color:'+s.color+'">'+s.label+'</div><div class="metric-value">'+s.value+'</div></div>'}).join('')}
-
-// ============================================
-// REVENUE HELPERS
-// ============================================
 function formatRevInput(input){var raw=input.value.replace(/[^0-9.]/g,'');var num=parseFloat(raw);if(!isNaN(num)&&num>0)input.value='$'+num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});else if(raw==='')input.value=''}
 async function saveRevenue(sessionId){var input=document.getElementById('rev-'+sessionId);if(!input)return;var rawVal=input.value.replace(/[^0-9.]/g,'');var amount=parseFloat(rawVal);if(isNaN(amount)||amount<=0){input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='rgba(255,255,255,0.1)'},1500);return}var{error}=await sb.from('leads').update({event_revenue:amount}).eq('session_id',sessionId);if(error){input.style.borderColor='var(--red)';showToast('Error saving revenue','error')}else{input.value='$'+amount.toLocaleString();input.style.borderColor='var(--green)';showToast('Revenue saved!','success');setTimeout(function(){input.style.borderColor='rgba(255,255,255,0.1)'},1500)}}
 
-// ============================================
-// PASSWORD RESET
-// ============================================
-async function checkForPasswordReset(){var hash=window.location.hash;if(hash&&hash.includes('type=recovery')){var{data}=await sb.auth.getSession();if(data&&data.session){document.getElementById('login-page').style.display='none';document.getElementById('reset-page').style.display='flex';return true}}return false}
+
+// ============ FOLLOW-UPS (redesigned) ============
+async function loadFollowups(){
+  var{data:metrics}=await sb.from('dashboard_metrics').select('*');
+  if(metrics&&metrics.length){
+    var filtered=metrics;if(selectedVenue!=='all')filtered=metrics.filter(function(v){return v.venue_id===selectedVenue});
+    if(filtered.length){
+      var m=filtered.length>1?{reminders_sent:filtered.reduce(function(s,v){return s+(v.reminders_sent||0)},0),attendance_checks_sent:filtered.reduce(function(s,v){return s+(v.attendance_checks_sent||0)},0),post_tour_emails_sent:filtered.reduce(function(s,v){return s+(v.post_tour_emails_sent||0)},0),nurture_emails_sent:filtered.reduce(function(s,v){return s+(v.nurture_emails_sent||0)},0),unsubscribed:filtered.reduce(function(s,v){return s+(v.unsubscribed||0)},0),followup_optins:filtered.reduce(function(s,v){return s+(v.followup_optins||0)},0),sms_optins:filtered.reduce(function(s,v){return s+(v.sms_optins||0)},0)}:filtered[0];
+      document.getElementById('followup-metrics').innerHTML=[{label:'Tour Reminders Sent',value:m.reminders_sent,color:'var(--blue)'},{label:'Attendance Checks Sent',value:m.attendance_checks_sent,color:'var(--amber)'},{label:'Post-Tour Emails',value:m.post_tour_emails_sent,color:'var(--green)'},{label:'Nurture Emails',value:m.nurture_emails_sent,color:'var(--accent)'},{label:'Email Opt-ins',value:m.followup_optins,color:'var(--green)'},{label:'SMS Opt-ins',value:m.sms_optins||0,color:'var(--blue)'},{label:'Unsubscribed',value:m.unsubscribed,color:'var(--red)'}].map(function(s){return'<div class="metric-card"><div class="metric-label" style="color:'+s.color+'">'+s.label+'</div><div class="metric-value">'+s.value+'</div></div>'}).join('');
+    }
+  }
+  // Per-lead trackers: fetch leads where any follow-up activity could happen
+  var query=sb.from('leads').select('session_id,name,email,phone,lead_status,tour_date,tour_booked,tour_attended,attendance_confirmed_at,reminder_sent,followup_1_sent,followup_2_sent,nurture_sent,attendance_email_sent_staff,unsubscribed,followup_optin,created_at,updated_at').order('updated_at',{ascending:false}).limit(500);
+  if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);
+  var{data:leads,error}=await query;
+  if(error||!leads){document.getElementById('fu-tbody').innerHTML='<tr><td colspan="5" class="empty-state">Error loading leads</td></tr>';return}
+  // Only show leads in a follow-up relevant state
+  _fuLeadsCache=leads.filter(function(l){return l.tour_booked||['post_tour','cold_nurture','final_checkin','expired','no_show','tour_attended','tour_scheduled'].indexOf(l.lead_status)>-1});
+  applyFollowupFilters();
+}
+
+function applyFollowupFilters(){
+  var search=(document.getElementById('fu-search').value||'').toLowerCase().trim();
+  var status=document.getElementById('fu-status-filter').value;
+  var filtered=_fuLeadsCache.filter(function(l){
+    if(search){
+      var n=(l.name||'').toLowerCase().indexOf(search)>-1;
+      var e=(l.email||'').toLowerCase().indexOf(search)>-1;
+      var p=(l.phone||'').toLowerCase().indexOf(search)>-1;
+      if(!n&&!e&&!p)return false;
+    }
+    if(status&&l.lead_status!==status)return false;
+    return true;
+  });
+  renderFollowupTable(filtered);
+}
+
+function clearFollowupFilters(){
+  document.getElementById('fu-search').value='';
+  document.getElementById('fu-status-filter').value='';
+  applyFollowupFilters();
+}
+
+function renderFollowupTable(leads){
+  document.getElementById('fu-count').textContent=leads.length+' leads';
+  if(!leads.length){
+    document.getElementById('fu-tbody').innerHTML='<tr><td colspan="5" class="empty-state">No leads in follow-up flow yet</td></tr>';
+    return;
+  }
+  document.getElementById('fu-tbody').innerHTML=leads.map(function(l){
+    var compact=renderCompactTracker(l);
+    return '<tr id="fu-row-'+l.session_id+'"><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.tour_date||'\u2014')+'</td><td>'+compact+'</td><td><button class="view-full-btn" onclick="toggleFullTree(\''+l.session_id+'\')">View Full</button></td></tr>';
+  }).join('');
+}
+
+// ============ TRACKER: STEP DEFINITIONS ============
+// Each lead's journey derived from flags. Returns ordered array of step objects.
+// Steps: {id, label, state: done/current/next/skipped}
+function getLeadSteps(l){
+  var steps=[];
+  // 1. Lead captured (always done if they're in the list)
+  steps.push({id:'captured',label:'Lead captured',state:'done'});
+  // 2. Tour booked
+  steps.push({id:'tour_booked',label:'Tour booked',state:l.tour_booked?'done':'next'});
+  // 3. Tour reminder (day before tour)
+  steps.push({id:'reminder',label:'Tour reminder',state:l.reminder_sent?'done':(l.tour_booked?'current':'next')});
+  // 4. Tour attended check (happens via webhook click)
+  var attendanceKnown=l.tour_attended!==null&&l.tour_attended!==undefined;
+  steps.push({id:'attended_check',label:'Attendance check',state:attendanceKnown?'done':(l.reminder_sent?'current':'next')});
+  // 5. Branch: Post-Tour email (fires for both paths)
+  steps.push({id:'post_tour',label:'Post-tour email',state:l.followup_1_sent?'done':(attendanceKnown?'current':'next')});
+  // 6. Branch split based on tour_attended
+  if(l.tour_attended===false){
+    // No-show path
+    steps.push({id:'noshow_1',label:'No-show #1',state:l.nurture_sent?'done':(l.followup_1_sent?'current':'next'),branch:'noshow'});
+    steps.push({id:'noshow_2',label:'No-show #2',state:l.followup_2_sent?'done':(l.nurture_sent?'current':'next'),branch:'noshow'});
+  } else if(l.tour_attended===true){
+    // Attended path
+    steps.push({id:'att_1',label:'Great meeting you',state:l.nurture_sent?'done':(l.followup_1_sent?'current':'next'),branch:'attended'});
+    steps.push({id:'att_2',label:'Dates filling up',state:l.followup_2_sent?'done':(l.nurture_sent?'current':'next'),branch:'attended'});
+  } else {
+    // Path unknown yet \u2014 show placeholder
+    steps.push({id:'branch_wait',label:'Awaiting outcome',state:'next'});
+  }
+  // 7. Cold nurture (both paths converge)
+  steps.push({id:'cold',label:'Cold nurture',state:l.lead_status==='cold_nurture'||l.lead_status==='final_checkin'||l.lead_status==='expired'?'done':(l.followup_2_sent?'current':'next')});
+  // 8. Final check-in
+  steps.push({id:'final',label:'Final check-in',state:l.lead_status==='final_checkin'||l.lead_status==='expired'?'done':(l.lead_status==='cold_nurture'?'current':'next')});
+  // 9. Expired
+  steps.push({id:'expired',label:'Expired',state:l.lead_status==='expired'||l.unsubscribed?'done':'next'});
+  return steps;
+}
+
+function renderCompactTracker(l){
+  var steps=getLeadSteps(l);
+  // Find current; show prev/current/next
+  var currentIdx=-1;
+  for(var i=0;i<steps.length;i++){if(steps[i].state==='current'){currentIdx=i;break}}
+  // If no current, find last done and show that + next unknown
+  if(currentIdx===-1){
+    var lastDone=-1;
+    for(var j=0;j<steps.length;j++){if(steps[j].state==='done')lastDone=j}
+    currentIdx=Math.min(lastDone+1,steps.length-1);
+    // In this case, the "current" is really the next upcoming
+    if(steps[currentIdx]&&steps[currentIdx].state==='next'){
+      // Show last done + upcoming
+      var show=[];
+      if(lastDone>=0)show.push(steps[lastDone]);
+      show.push(steps[currentIdx]);
+      if(currentIdx+1<steps.length)show.push(steps[currentIdx+1]);
+      return renderDots(show);
+    }
+  }
+  var visible=[];
+  if(currentIdx>0)visible.push(steps[currentIdx-1]);
+  visible.push(steps[currentIdx]);
+  if(currentIdx+1<steps.length)visible.push(steps[currentIdx+1]);
+  return renderDots(visible);
+}
+
+function renderDots(steps){
+  return '<div class="tracker-compact">'+steps.map(function(s,i){
+    var sep=i<steps.length-1?'<span class="tc-sep">\u203a</span>':'';
+    return '<div class="tc-step"><div class="tc-dot '+s.state+'"></div><div class="tc-label '+s.state+'">'+s.label+'</div></div>'+sep;
+  }).join('')+'</div>';
+}
+
+// ============ TREE VIEW (expandable) ============
+function toggleFullTree(sessionId){
+  var existing=document.getElementById('fu-tree-'+sessionId);
+  if(existing){existing.parentNode.removeChild(existing);return}
+  var lead=_fuLeadsCache.find(function(l){return l.session_id===sessionId});
+  if(!lead)return;
+  var row=document.getElementById('fu-row-'+sessionId);
+  if(!row)return;
+  var treeRow=document.createElement('tr');
+  treeRow.id='fu-tree-'+sessionId;
+  treeRow.className='tree-row';
+  treeRow.innerHTML='<td colspan="5"><div class="tree-container"><div class="tree-title">Full follow-up journey</div><div class="tree-svg-wrap">'+renderTreeSvg(lead)+'</div></div></td>';
+  row.parentNode.insertBefore(treeRow,row.nextSibling);
+}
+
+function renderTreeSvg(l){
+  // Layout: linear stages 1-5, then branch (attended top / no-show bottom) through stages 6-7, converge at cold nurture, continue to expired
+  var W=820,H=240;
+  var colors={done:{fill:'#4ade80',stroke:'#4ade80',text:'#4ade80',soft:'rgba(74,222,128,0.12)'},current:{fill:'#3a9fb0',stroke:'#3a9fb0',text:'#3a9fb0',soft:'rgba(58,159,176,0.18)'},next:{fill:'transparent',stroke:'rgba(255,255,255,0.25)',text:'rgba(255,255,255,0.4)',soft:'rgba(255,255,255,0.03)'},skipped:{fill:'transparent',stroke:'rgba(239,68,68,0.4)',text:'rgba(239,68,68,0.6)',soft:'rgba(239,68,68,0.06)'}};
+  var steps=getLeadSteps(l);
+  // Map steps by id
+  var byId={};steps.forEach(function(s){byId[s.id]=s});
+  // Define node positions
+  var nodes=[
+    {id:'captured',x:60,y:120,label:'Captured'},
+    {id:'tour_booked',x:170,y:120,label:'Tour Booked'},
+    {id:'reminder',x:280,y:120,label:'Reminder'},
+    {id:'attended_check',x:390,y:120,label:'Check'},
+    {id:'post_tour',x:500,y:120,label:'Post-Tour'}
+  ];
+  // Branch: attended (top) / no-show (bottom)
+  var attendedBranch=[
+    {id:'att_1',x:600,y:60,label:'Meeting you'},
+    {id:'att_2',x:700,y:60,label:'Dates filling'}
+  ];
+  var noshowBranch=[
+    {id:'noshow_1',x:600,y:180,label:'No-show #1'},
+    {id:'noshow_2',x:700,y:180,label:'No-show #2'}
+  ];
+  // Converge
+  var coldNode={id:'cold',x:800,y:120,label:'Cold Nurture'};
+  var finalNode={id:'final',x:800,y:120,label:'Final'}; // same x, will appear at bottom row
+  var expiredNode={id:'expired',x:800,y:120,label:'Expired'};
+  // Actually we'll just put the converge/final/expired in a tail horizontal line
+  // Simplified: add tail nodes after cold
+  var tail=[
+    {id:'cold',x:780,y:120,label:'Cold Nurture'}
+  ];
+  // Derive path - determine which branch the lead is on, or neither yet
+  var pathAttended=l.tour_attended===true;
+  var pathNoshow=l.tour_attended===false;
+  var pathUnknown=!pathAttended&&!pathNoshow;
+
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:'+H+'px;font-family:Outfit,sans-serif">';
+  // Define arrow markers
+  svg+='<defs>';
+  svg+='<marker id="arrow-done" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>';
+  svg+='<marker id="arrow-dim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,0.15)"/></marker>';
+  svg+='</defs>';
+
+  function connectorColor(fromState,toState){
+    if(fromState==='done'&&(toState==='done'||toState==='current'))return '#4ade80';
+    return 'rgba(255,255,255,0.12)';
+  }
+  function drawLine(x1,y1,x2,y2,color,marker){
+    return '<path d="M'+x1+','+y1+' L'+x2+','+y2+'" stroke="'+color+'" stroke-width="1.5" fill="none"'+(marker?' marker-end="url(#'+marker+')"':'')+'/>';
+  }
+  function drawCurve(x1,y1,x2,y2,color,marker){
+    var mid=(x1+x2)/2;
+    return '<path d="M'+x1+','+y1+' C'+mid+','+y1+' '+mid+','+y2+' '+x2+','+y2+'" stroke="'+color+'" stroke-width="1.5" fill="none"'+(marker?' marker-end="url(#'+marker+')"':'')+'/>';
+  }
+
+  // Linear connectors 1->2->3->4->5
+  for(var ni=0;ni<nodes.length-1;ni++){
+    var a=nodes[ni],b=nodes[ni+1];
+    var aS=byId[a.id].state,bS=byId[b.id].state;
+    var c=connectorColor(aS,bS);
+    svg+=drawLine(a.x+28,a.y,b.x-28,b.y,c,aS==='done'?'arrow-done':'arrow-dim');
+  }
+  // From post_tour to both branches (curve)
+  var postTour=nodes[nodes.length-1];
+  var ptS=byId['post_tour'].state;
+  // Attended branch
+  svg+=drawCurve(postTour.x+28,postTour.y,attendedBranch[0].x-28,attendedBranch[0].y,pathAttended?connectorColor(ptS,byId['att_1'].state):'rgba(255,255,255,0.1)',pathAttended&&ptS==='done'?'arrow-done':'arrow-dim');
+  // No-show branch
+  svg+=drawCurve(postTour.x+28,postTour.y,noshowBranch[0].x-28,noshowBranch[0].y,pathNoshow?connectorColor(ptS,byId['noshow_1'].state):'rgba(255,255,255,0.1)',pathNoshow&&ptS==='done'?'arrow-done':'arrow-dim');
+  // Attended internal connector
+  svg+=drawLine(attendedBranch[0].x+28,attendedBranch[0].y,attendedBranch[1].x-28,attendedBranch[1].y,pathAttended?connectorColor(byId['att_1'].state,byId['att_2'].state):'rgba(255,255,255,0.1)',pathAttended&&byId['att_1'].state==='done'?'arrow-done':'arrow-dim');
+  // No-show internal connector
+  svg+=drawLine(noshowBranch[0].x+28,noshowBranch[0].y,noshowBranch[1].x-28,noshowBranch[1].y,pathNoshow?connectorColor(byId['noshow_1'].state,byId['noshow_2'].state):'rgba(255,255,255,0.1)',pathNoshow&&byId['noshow_1'].state==='done'?'arrow-done':'arrow-dim');
+  // Converge lines to cold
+  var tailX=780,tailY=120;
+  svg+=drawCurve(attendedBranch[1].x+28,attendedBranch[1].y,tailX-28,tailY,pathAttended?connectorColor(byId['att_2'].state,byId['cold'].state):'rgba(255,255,255,0.08)',pathAttended&&byId['att_2'].state==='done'?'arrow-done':'arrow-dim');
+  svg+=drawCurve(noshowBranch[1].x+28,noshowBranch[1].y,tailX-28,tailY,pathNoshow?connectorColor(byId['noshow_2'].state,byId['cold'].state):'rgba(255,255,255,0.08)',pathNoshow&&byId['noshow_2'].state==='done'?'arrow-done':'arrow-dim');
+
+  // Draw nodes helper
+  function drawNode(n,stepState){
+    var c=colors[stepState]||colors.next;
+    var strokeW=stepState==='current'?2:1.5;
+    var pulse=stepState==='current'?'<circle cx="'+n.x+'" cy="'+n.y+'" r="32" fill="'+c.soft+'" opacity="0.5"><animate attributeName="r" values="26;34;26" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite"/></circle>':'';
+    var check=stepState==='done'?'<path d="M'+(n.x-5)+','+n.y+' L'+(n.x-1)+','+(n.y+4)+' L'+(n.x+6)+','+(n.y-4)+'" stroke="#0d1117" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>':'';
+    var dot=stepState==='current'?'<circle cx="'+n.x+'" cy="'+n.y+'" r="4" fill="#0d1117"/>':'';
+    return pulse+'<circle cx="'+n.x+'" cy="'+n.y+'" r="14" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="'+strokeW+'"/>'+check+dot+'<text x="'+n.x+'" y="'+(n.y+32)+'" text-anchor="middle" fill="'+c.text+'" font-size="10" font-weight="500">'+n.label+'</text>';
+  }
+
+  // Main line nodes
+  nodes.forEach(function(n){svg+=drawNode(n,byId[n.id].state)});
+  // Attended branch nodes
+  attendedBranch.forEach(function(n){var s=pathAttended?byId[n.id].state:(pathNoshow?'skipped':'next');svg+=drawNode(n,s)});
+  // No-show branch nodes
+  noshowBranch.forEach(function(n){var s=pathNoshow?byId[n.id].state:(pathAttended?'skipped':'next');svg+=drawNode(n,s)});
+  // Cold node
+  svg+=drawNode({x:tailX,y:tailY,label:'Cold Nurture'},byId['cold'].state);
+
+  // Legend
+  svg+='<g transform="translate(20,215)">';
+  svg+='<circle cx="0" cy="0" r="5" fill="#4ade80"/><text x="10" y="3" fill="rgba(255,255,255,0.5)" font-size="10">Done</text>';
+  svg+='<circle cx="60" cy="0" r="5" fill="#3a9fb0"/><text x="70" y="3" fill="rgba(255,255,255,0.5)" font-size="10">Current</text>';
+  svg+='<circle cx="135" cy="0" r="5" fill="transparent" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/><text x="145" y="3" fill="rgba(255,255,255,0.5)" font-size="10">Upcoming</text>';
+  svg+='<circle cx="220" cy="0" r="5" fill="transparent" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/><text x="230" y="3" fill="rgba(255,255,255,0.5)" font-size="10">Not applicable</text>';
+  svg+='</g>';
+
+  svg+='</svg>';
+  return svg;
+}
+
+
+// ============ PASSWORD RESET (unchanged) ============
+async function checkForPasswordReset(){var hash=window.location.hash;if(hash&&hash.indexOf('type=recovery')>-1){var{data}=await sb.auth.getSession();if(data&&data.session){document.getElementById('login-page').style.display='none';document.getElementById('reset-page').style.display='flex';return true}}return false}
 async function handleResetPassword(){var pw=document.getElementById('reset-password').value,confirm=document.getElementById('reset-confirm').value,btn=document.getElementById('reset-btn'),err=document.getElementById('reset-error'),success=document.getElementById('reset-success');err.style.display='none';success.style.display='none';if(!pw||pw.length<6){err.textContent='Password must be at least 6 characters';err.style.display='block';return}if(pw!==confirm){err.textContent='Passwords do not match';err.style.display='block';return}btn.disabled=true;btn.textContent='Updating...';var{error}=await sb.auth.updateUser({password:pw});if(error){err.textContent=error.message;err.style.display='block';btn.disabled=false;btn.textContent='Set Password';return}success.textContent='Password updated! Redirecting to dashboard...';success.style.display='block';btn.style.display='none';setTimeout(function(){window.location.hash='';window.location.reload()},1500)}
 document.getElementById('reset-confirm').addEventListener('keypress',function(e){if(e.key==='Enter')handleResetPassword()});
 
