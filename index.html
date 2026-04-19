@@ -123,6 +123,13 @@ td.name-cell{color:var(--text);font-weight:500}
 .filter-clear:hover{border-color:var(--red);color:var(--red)}
 .empty-state{padding:48px 24px;text-align:center;color:var(--text-dim);font-size:13px}
 
+/* Sortable column headers */
+th.sortable{cursor:pointer;user-select:none;transition:color 0.15s}
+th.sortable:hover{color:var(--accent)}
+th.sortable .sort-arrow{display:inline-block;margin-left:4px;opacity:0.4;font-size:9px;vertical-align:1px;transition:opacity 0.15s}
+th.sortable.active{color:var(--accent)}
+th.sortable.active .sort-arrow{opacity:1}
+
 /* ======= NEW: Follow-up tracker styles ======= */
 .tracker-compact{display:inline-flex;align-items:center;gap:6px;padding:4px 0}
 .tracker-compact .tc-step{display:flex;align-items:center;gap:5px}
@@ -270,7 +277,7 @@ td.name-cell{color:var(--text);font-weight:500}
       <div class="table-card">
         <div class="table-header"><h3>Recent Leads</h3><div class="table-count" id="leads-count">&mdash;</div></div>
         <div style="overflow-x:auto;">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Created</th></tr></thead><tbody id="leads-tbody"></tbody></table>
+          <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th class="sortable active" id="leads-sort-created" onclick="toggleLeadsSort()">Created <span class="sort-arrow" id="leads-sort-arrow">&darr;</span></th></tr></thead><tbody id="leads-tbody"></tbody></table>
         </div>
       </div>
     </div>
@@ -332,7 +339,7 @@ td.name-cell{color:var(--text);font-weight:500}
       <div class="table-card">
         <div class="table-header"><h3>Lead Follow-up Progress</h3><div class="table-count" id="fu-count">&mdash;</div></div>
         <div style="overflow-x:auto;">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Tour Date</th><th>Progress</th><th></th></tr></thead><tbody id="fu-tbody"></tbody></table>
+          <table><thead><tr><th>Name</th><th>Email</th><th class="sortable active" id="fu-sort-tour" onclick="toggleFuSort()">Tour Date <span class="sort-arrow" id="fu-sort-arrow">&uarr;</span></th><th>Progress</th><th></th></tr></thead><tbody id="fu-tbody"></tbody></table>
         </div>
       </div>
     </div>
@@ -365,6 +372,10 @@ var invoiceSessionId=null;
 // Caches for filtering without re-fetching
 var _leadsCache=[],_fuLeadsCache=[];
 var _leadsDateType='created';
+// Sort state: Follow-ups defaults to upcoming tours first (ascending by tour_date from today).
+// Leads defaults to newest first (descending by created_at).
+var _fuSortDir='asc';   // asc = upcoming soonest first, desc = latest first
+var _leadsSortDir='desc'; // desc = newest first, asc = oldest first
 
 function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'success')+' show';setTimeout(function(){t.className='toast'},3000)}
 
@@ -508,17 +519,29 @@ function clearLeadFilters(){
 }
 
 function renderLeadsTable(leads){
-  document.getElementById('leads-count').textContent=leads.length+' leads';
-  if(!leads.length){
+  // Sort by created_at
+  var sorted=leads.slice().sort(function(a,b){
+    var ta=a.created_at?new Date(a.created_at).getTime():0;
+    var tb=b.created_at?new Date(b.created_at).getTime():0;
+    return _leadsSortDir==='desc'?tb-ta:ta-tb;
+  });
+  document.getElementById('leads-count').textContent=sorted.length+' leads';
+  if(!sorted.length){
     document.getElementById('leads-tbody').innerHTML='<tr><td colspan="5" class="empty-state">No leads match your filters</td></tr>';
     return;
   }
-  document.getElementById('leads-tbody').innerHTML=leads.map(function(l){
+  document.getElementById('leads-tbody').innerHTML=sorted.map(function(l){
     var phone=l.phone?'('+l.phone.slice(0,3)+') '+l.phone.slice(3,6)+'-'+l.phone.slice(6):'\u2014';
     var created=l.created_at?new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014';
     var statusBadge='<select onchange="updateLeadStatus(\''+l.session_id+'\',this.value)" style="padding:4px 8px;border-radius:6px;font-size:10px;font-weight:600;font-family:Outfit,sans-serif;cursor:pointer;outline:none;border:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;'+(l.event_booked?'background:var(--green-soft);color:var(--green)':l.tour_attended===true?'background:var(--blue-soft);color:var(--blue)':l.tour_attended===false?'background:var(--red-soft);color:var(--red)':l.tour_booked?'background:var(--amber-soft);color:var(--amber)':'background:rgba(255,255,255,0.04);color:var(--text-dim)')+'">'+'<option value="new"'+((!l.tour_booked&&!l.event_booked&&l.lead_status!=='qualified')?' selected':'')+'>New</option>'+'<option value="qualified"'+((!l.tour_booked&&!l.event_booked&&l.lead_status==='qualified')?' selected':'')+'>Qualified</option>'+'<option value="tour_booked"'+((l.tour_booked&&!l.tour_attended&&l.tour_attended!==false&&!l.event_booked)?' selected':'')+'>Tour Booked</option>'+'<option value="attended"'+((l.tour_attended===true&&!l.event_booked)?' selected':'')+'>Attended</option>'+'<option value="no_show"'+((l.tour_attended===false)?' selected':'')+'>No-Show</option>'+'<option value="event_booked"'+((l.event_booked)?' selected':'')+'>Event Booked</option>'+'</select>';
     return'<tr><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+phone+'</td><td>'+statusBadge+'</td><td>'+created+'</td></tr>';
   }).join('');
+}
+
+function toggleLeadsSort(){
+  _leadsSortDir=_leadsSortDir==='desc'?'asc':'desc';
+  document.getElementById('leads-sort-arrow').innerHTML=_leadsSortDir==='desc'?'&darr;':'&uarr;';
+  applyLeadFilters();
 }
 
 
@@ -612,15 +635,64 @@ function clearFollowupFilters(){
 }
 
 function renderFollowupTable(leads){
-  document.getElementById('fu-count').textContent=leads.length+' leads';
-  if(!leads.length){
+  // Parse "Apr 21 At 10:00 Am" format into comparable timestamp
+  function parseTourDate(s){
+    if(!s)return null;
+    var m=s.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+)(?:\s+At\s+(\d+)(?::(\d+))?\s*(Am|Pm)?)?/i);
+    if(!m)return null;
+    var monthMap={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+    var month=monthMap[m[1].toLowerCase().substr(0,3)];
+    var day=parseInt(m[2]);
+    var hour=m[3]?parseInt(m[3]):12;
+    var min=m[4]?parseInt(m[4]):0;
+    var ampm=m[5]?m[5].toLowerCase():null;
+    if(ampm==='pm'&&hour<12)hour+=12;
+    if(ampm==='am'&&hour===12)hour=0;
+    var yearMatch=s.match(/20\d\d/);
+    var year=yearMatch?parseInt(yearMatch[0]):new Date().getFullYear();
+    // If no year and parsed date is more than 60 days in the past, assume next year
+    if(!yearMatch){
+      var candidate=new Date(year,month,day,hour,min).getTime();
+      var now=Date.now();
+      if(candidate<now-60*86400000)year+=1;
+    }
+    return new Date(year,month,day,hour,min).getTime();
+  }
+  // Sort: asc = upcoming tours first (soonest future date at top, past dates fall below)
+  var now=Date.now();
+  var sorted=leads.slice().sort(function(a,b){
+    var ta=parseTourDate(a.tour_date);
+    var tb=parseTourDate(b.tour_date);
+    // Nulls always to bottom
+    if(ta===null&&tb===null)return 0;
+    if(ta===null)return 1;
+    if(tb===null)return -1;
+    if(_fuSortDir==='asc'){
+      // Upcoming first: future dates sorted ascending, past dates pushed to bottom descending
+      var aFuture=ta>=now,bFuture=tb>=now;
+      if(aFuture&&!bFuture)return -1;
+      if(!aFuture&&bFuture)return 1;
+      if(aFuture&&bFuture)return ta-tb;
+      return tb-ta; // past: most recent past first
+    } else {
+      return tb-ta; // desc: latest date first regardless
+    }
+  });
+  document.getElementById('fu-count').textContent=sorted.length+' leads';
+  if(!sorted.length){
     document.getElementById('fu-tbody').innerHTML='<tr><td colspan="5" class="empty-state">No leads in follow-up flow yet</td></tr>';
     return;
   }
-  document.getElementById('fu-tbody').innerHTML=leads.map(function(l){
+  document.getElementById('fu-tbody').innerHTML=sorted.map(function(l){
     var compact=renderCompactTracker(l);
     return '<tr id="fu-row-'+l.session_id+'"><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.tour_date||'\u2014')+'</td><td>'+compact+'</td><td><button class="view-full-btn" onclick="toggleFullTree(\''+l.session_id+'\')">View Full</button></td></tr>';
   }).join('');
+}
+
+function toggleFuSort(){
+  _fuSortDir=_fuSortDir==='asc'?'desc':'asc';
+  document.getElementById('fu-sort-arrow').innerHTML=_fuSortDir==='asc'?'&uarr;':'&darr;';
+  applyFollowupFilters();
 }
 
 // ============ TRACKER: STEP DEFINITIONS ============
