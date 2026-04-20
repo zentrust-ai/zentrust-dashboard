@@ -718,8 +718,8 @@ function getLeadSteps(l){
     steps.push({id:'noshow_2',label:'No-show #2',state:l.followup_2_sent?'done':(l.nurture_sent?'current':'next'),branch:'noshow'});
   } else if(l.tour_attended===true){
     // Attended path
-    steps.push({id:'att_1',label:'Great meeting you',state:l.nurture_sent?'done':(l.followup_1_sent?'current':'next'),branch:'attended'});
-    steps.push({id:'att_2',label:'Dates filling up',state:l.followup_2_sent?'done':(l.nurture_sent?'current':'next'),branch:'attended'});
+    steps.push({id:'att_1',label:'Attended #1',state:l.nurture_sent?'done':(l.followup_1_sent?'current':'next'),branch:'attended'});
+    steps.push({id:'att_2',label:'Attended #2',state:l.followup_2_sent?'done':(l.nurture_sent?'current':'next'),branch:'attended'});
   } else {
     // Path unknown yet \u2014 show placeholder
     steps.push({id:'branch_wait',label:'Awaiting outcome',state:'next'});
@@ -794,13 +794,13 @@ function renderTreeSvg(l){
     {id:'captured',x:60,y:120,label:'Captured'},
     {id:'tour_booked',x:170,y:120,label:'Tour Booked'},
     {id:'reminder',x:280,y:120,label:'Reminder'},
-    {id:'attended_check',x:390,y:120,label:'Check'},
+    {id:'attended_check',x:390,y:120,label:'Attendance|Check'},
     {id:'post_tour',x:500,y:120,label:'Post-Tour'}
   ];
   // Branch: attended (top) / no-show (bottom)
   var attendedBranch=[
-    {id:'att_1',x:600,y:60,label:'Meeting you'},
-    {id:'att_2',x:700,y:60,label:'Dates filling'}
+    {id:'att_1',x:600,y:60,label:'Attended #1'},
+    {id:'att_2',x:700,y:60,label:'Attended #2'}
   ];
   var noshowBranch=[
     {id:'noshow_1',x:600,y:180,label:'No-show #1'},
@@ -869,7 +869,18 @@ function renderTreeSvg(l){
     var pulse=stepState==='current'?'<circle cx="'+n.x+'" cy="'+n.y+'" r="32" fill="'+c.soft+'" opacity="0.5"><animate attributeName="r" values="26;34;26" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite"/></circle>':'';
     var check=stepState==='done'?'<path d="M'+(n.x-5)+','+n.y+' L'+(n.x-1)+','+(n.y+4)+' L'+(n.x+6)+','+(n.y-4)+'" stroke="#0d1117" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>':'';
     var dot=stepState==='current'?'<circle cx="'+n.x+'" cy="'+n.y+'" r="4" fill="#0d1117"/>':'';
-    return pulse+'<circle cx="'+n.x+'" cy="'+n.y+'" r="14" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="'+strokeW+'"/>'+check+dot+'<text x="'+n.x+'" y="'+(n.y+32)+'" text-anchor="middle" fill="'+c.text+'" font-size="10" font-weight="500">'+n.label+'</text>';
+    // Labels can be split into stacked lines by including "|" in the label
+    var labelParts=(n.label||'').split('|');
+    var labelSvg='<text x="'+n.x+'" y="'+(n.y+32)+'" text-anchor="middle" fill="'+c.text+'" font-size="10" font-weight="500">';
+    if(labelParts.length>1){
+      for(var li=0;li<labelParts.length;li++){
+        labelSvg+='<tspan x="'+n.x+'" dy="'+(li===0?0:12)+'">'+labelParts[li]+'</tspan>';
+      }
+    } else {
+      labelSvg+=n.label;
+    }
+    labelSvg+='</text>';
+    return pulse+'<circle cx="'+n.x+'" cy="'+n.y+'" r="14" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="'+strokeW+'"/>'+check+dot+labelSvg;
   }
 
   // Main line nodes
