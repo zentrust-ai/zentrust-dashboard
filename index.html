@@ -628,17 +628,25 @@ var _invLeadsCache=[], _invoicesCache=[], _invSelectedLead=null, _invSortDir='de
 
 async function loadInvoices(){
   // Load all leads for the dropdown (used by lead picker)
-  var lq=sb.from('recent_leads').select('session_id,name,email,date_interest,guest_count,tour_date,lead_status,venue_id,id').limit(500);
+  // Query the leads table directly (not recent_leads view) to guarantee 'id' column exists.
+  var lq=sb.from('leads').select('id,session_id,name,email,date_interest,guest_count,tour_date,lead_status,venue_id,created_at').order('created_at',{ascending:false}).limit(500);
   if(selectedVenue!=='all')lq=lq.eq('venue_id',selectedVenue);
-  var{data:leadRows}=await lq;
-  _invLeadsCache=leadRows||[];
+  var leadRes=await lq;
+  if(leadRes.error){
+    console.error('Invoices: lead fetch failed',leadRes.error);
+    showToast('Error loading leads: '+leadRes.error.message,'error');
+    _invLeadsCache=[];
+  } else {
+    _invLeadsCache=leadRes.data||[];
+  }
 
   // Load all invoices with lead context
   var iq=sb.from('invoices_with_lead').select('*').order('created_at',{ascending:false}).limit(500);
   if(selectedVenue!=='all')iq=iq.eq('venue_id',selectedVenue);
   var{data:invs,error}=await iq;
   if(error){
-    showToast('Error loading invoices: '+error.message,'error');
+    console.error('Invoices: invoice fetch failed',error);
+    // Don't toast this one \u2014 table might just be empty / not migrated yet
     _invoicesCache=[];
   } else {
     _invoicesCache=invs||[];
@@ -689,19 +697,24 @@ function onLeadInputChange(){
 
 function renderLeadDropdown(search){
   search=(search||'').toLowerCase().trim();
+  var dd=document.getElementById('inv-lead-dropdown');
+  // If cache is empty, show an informative message rather than "No matching"
+  if(!_invLeadsCache.length){
+    dd.innerHTML='<div style="padding:12px 14px;font-size:12px;color:var(--text-dim);">No leads loaded. Reload the page or check console for errors.</div>';
+    return;
+  }
   var matches=_invLeadsCache.filter(function(l){
     if(!search)return true;
     var n=(l.name||'').toLowerCase();
     var e=(l.email||'').toLowerCase();
     return n.indexOf(search)>-1||e.indexOf(search)>-1;
   }).slice(0,10);
-  var dd=document.getElementById('inv-lead-dropdown');
   if(!matches.length){
-    dd.innerHTML='<div style="padding:12px 14px;font-size:12px;color:var(--text-dim);">No matching leads</div>';
+    dd.innerHTML='<div style="padding:12px 14px;font-size:12px;color:var(--text-dim);">No leads matching "'+search+'"</div>';
     return;
   }
   dd.innerHTML=matches.map(function(l){
-    var sub=(l.date_interest||'\u2014')+(l.guest_count?' \u00b7 '+l.guest_count+' guests':'');
+    var sub=(l.date_interest||'no event date')+(l.guest_count?' \u00b7 '+l.guest_count+' guests':'');
     return '<div class="inv-lead-opt" onclick="selectLead(\''+l.session_id+'\')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseover="this.style.background=\'rgba(255,255,255,0.04)\'" onmouseout="this.style.background=\'\'"><div style="font-size:13px;font-weight:500;color:var(--text);">'+(l.name||'Unnamed')+'</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px;">'+(l.email||'no email')+' \u00b7 '+sub+'</div></div>';
   }).join('');
 }
