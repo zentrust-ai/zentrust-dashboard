@@ -123,6 +123,43 @@ td.name-cell{color:var(--text);font-weight:500}
 .filter-clear:hover{border-color:var(--red);color:var(--red)}
 .empty-state{padding:48px 24px;text-align:center;color:var(--text-dim);font-size:13px}
 
+/* Row action icon buttons */
+.row-actions{display:inline-flex;gap:6px;align-items:center}
+.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--text-secondary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;padding:0}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.icon-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+.icon-btn svg{width:13px;height:13px}
+.icon-btn:disabled{opacity:0.35;cursor:not-allowed}
+.icon-btn:disabled:hover{border-color:var(--border);color:var(--text-secondary);background:rgba(255,255,255,0.02)}
+
+/* Edit/delete modal */
+.ed-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;width:520px;max-width:92%;max-height:88vh;overflow-y:auto}
+.ed-modal h3{font-size:17px;font-weight:600;margin-bottom:6px}
+.ed-modal .ed-subtitle{font-size:12px;color:var(--text-secondary);margin-bottom:22px}
+.ed-modal .ed-field{margin-bottom:14px}
+.ed-modal .ed-field label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px}
+.ed-modal .ed-field input,.ed-modal .ed-field select,.ed-modal .ed-field textarea{width:100%;padding:10px 13px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13.5px;color:var(--text);outline:none;transition:border-color 0.15s}
+.ed-modal .ed-field input:focus,.ed-modal .ed-field select:focus,.ed-modal .ed-field textarea:focus{border-color:var(--accent)}
+.ed-modal .ed-field textarea{resize:vertical;min-height:60px;font-family:var(--font)}
+.ed-modal .ed-field input:disabled{opacity:0.5;cursor:not-allowed}
+.ed-modal .ed-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ed-modal .ed-actions{display:flex;gap:10px;margin-top:22px;justify-content:flex-end}
+.ed-modal .ed-btn{padding:10px 18px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s}
+.ed-modal .ed-btn-primary{background:var(--accent);color:#fff}
+.ed-modal .ed-btn-primary:hover{background:#4dbbc9}
+.ed-modal .ed-btn-danger{background:var(--red);color:#fff}
+.ed-modal .ed-btn-danger:hover{background:#dc2626}
+.ed-modal .ed-btn-danger:disabled{background:var(--red-soft);color:rgba(239,68,68,0.5);cursor:not-allowed}
+.ed-modal .ed-btn-secondary{background:none;border:1px solid var(--border);color:var(--text-secondary)}
+.ed-modal .ed-btn-secondary:hover{border-color:var(--text);color:var(--text)}
+
+.ed-warning{background:var(--red-soft);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:14px 16px;margin:0 0 18px;font-size:13px;color:rgba(255,210,210,0.95);line-height:1.55}
+.ed-warning strong{color:var(--red);font-weight:600}
+.ed-warning ul{margin:8px 0 0;padding-left:20px;font-size:12.5px;color:rgba(255,255,255,0.7)}
+.ed-warning li{margin:3px 0}
+
+.ed-confirm-input{font-family:var(--font);letter-spacing:0.08em;text-transform:uppercase;font-weight:600}
+
 /* Sortable column headers */
 th.sortable{cursor:pointer;user-select:none;transition:color 0.15s}
 th.sortable:hover{color:var(--accent)}
@@ -277,7 +314,7 @@ th.sortable.active .sort-arrow{opacity:1}
       <div class="table-card">
         <div class="table-header"><h3>Recent Leads</h3><div class="table-count" id="leads-count">&mdash;</div></div>
         <div style="overflow-x:auto;">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th class="sortable active" id="leads-sort-created" onclick="toggleLeadsSort()">Created <span class="sort-arrow" id="leads-sort-arrow">&darr;</span></th></tr></thead><tbody id="leads-tbody"></tbody></table>
+          <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th class="sortable active" id="leads-sort-created" onclick="toggleLeadsSort()">Created <span class="sort-arrow" id="leads-sort-arrow">&darr;</span></th><th></th></tr></thead><tbody id="leads-tbody"></tbody></table>
         </div>
       </div>
     </div>
@@ -428,6 +465,11 @@ th.sortable.active .sort-arrow{opacity:1}
       </div>
     </div>
   </div>
+</div>
+
+<!-- Edit / Delete Modal -->
+<div class="modal-overlay" id="ed-modal-overlay" onclick="if(event.target===this)closeEdModal()">
+  <div class="ed-modal" id="ed-modal-content"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -595,14 +637,14 @@ function renderLeadsTable(leads){
   });
   document.getElementById('leads-count').textContent=sorted.length+' leads';
   if(!sorted.length){
-    document.getElementById('leads-tbody').innerHTML='<tr><td colspan="5" class="empty-state">No leads match your filters</td></tr>';
+    document.getElementById('leads-tbody').innerHTML='<tr><td colspan="6" class="empty-state">No leads match your filters</td></tr>';
     return;
   }
   document.getElementById('leads-tbody').innerHTML=sorted.map(function(l){
     var phone=l.phone?'('+l.phone.slice(0,3)+') '+l.phone.slice(3,6)+'-'+l.phone.slice(6):'\u2014';
     var created=l.created_at?new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014';
     var statusBadge='<select onchange="updateLeadStatus(\''+l.session_id+'\',this.value)" style="padding:4px 8px;border-radius:6px;font-size:10px;font-weight:600;font-family:Outfit,sans-serif;cursor:pointer;outline:none;border:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;'+(l.event_booked?'background:var(--green-soft);color:var(--green)':l.tour_attended===true?'background:var(--blue-soft);color:var(--blue)':l.tour_attended===false?'background:var(--red-soft);color:var(--red)':l.tour_booked?'background:var(--amber-soft);color:var(--amber)':'background:rgba(255,255,255,0.04);color:var(--text-dim)')+'">'+'<option value="new"'+((!l.tour_booked&&!l.event_booked&&l.lead_status!=='qualified')?' selected':'')+'>New</option>'+'<option value="qualified"'+((!l.tour_booked&&!l.event_booked&&l.lead_status==='qualified')?' selected':'')+'>Qualified</option>'+'<option value="tour_booked"'+((l.tour_booked&&!l.tour_attended&&l.tour_attended!==false&&!l.event_booked)?' selected':'')+'>Tour Booked</option>'+'<option value="attended"'+((l.tour_attended===true&&!l.event_booked)?' selected':'')+'>Attended</option>'+'<option value="no_show"'+((l.tour_attended===false)?' selected':'')+'>No-Show</option>'+'<option value="event_booked"'+((l.event_booked)?' selected':'')+'>Event Booked</option>'+'</select>';
-    return'<tr><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+phone+'</td><td>'+statusBadge+'</td><td>'+created+'</td></tr>';
+    return'<tr><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+phone+'</td><td>'+statusBadge+'</td><td>'+created+'</td><td><button class="icon-btn" title="Edit lead" onclick="openLeadEditModal(\''+l.session_id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.375 2.625 3 3-9.75 9.75H8.625v-3l9.75-9.75Z"/></svg></button></td></tr>';
   }).join('');
 }
 
@@ -814,13 +856,23 @@ async function sendNewInvoice(){
         due_date: data.due_date
       })
     });
-    var body=await res.json();
-    if(!body||!body.success)throw new Error(body&&body.error?body.error:'Stripe error');
+    // Read response as text first so we can handle empty bodies / non-JSON errors
+    var raw=await res.text();
+    var body=null;
+    try{body=raw?JSON.parse(raw):null}catch(e){body=null}
+    if(!res.ok){
+      var serverMsg=body&&body.error?body.error:(raw?raw.substring(0,200):'HTTP '+res.status);
+      throw new Error(serverMsg);
+    }
+    if(!body||!body.success){
+      throw new Error((body&&body.error)?body.error:'Workflow did not complete (draft saved; check n8n executions)');
+    }
     showToast('Invoice for $'+data.amount.toLocaleString()+' sent!','success');
     clearInvoiceForm();
     loadInvoices();
   } catch(e){
-    showToast('Send failed: '+e.message+' (saved as draft)','error');
+    console.error('Invoice send failed',e);
+    showToast('Send failed: '+e.message+' (draft saved)','error');
     loadInvoices();
   } finally {
     btn.disabled=false;btn.textContent='Send Invoice';
@@ -850,10 +902,14 @@ function applyInvoiceFilters(){
 }
 
 function clearInvoiceFilterControls(){
+  var hadValue = document.getElementById('inv-log-search').value ||
+                 document.getElementById('inv-log-status').value ||
+                 document.getElementById('inv-log-type').value;
   document.getElementById('inv-log-search').value='';
   document.getElementById('inv-log-status').value='';
   document.getElementById('inv-log-type').value='';
   applyInvoiceFilters();
+  if(hadValue)showToast('Filters cleared','success');
 }
 
 function toggleInvoiceSort(){
@@ -896,7 +952,10 @@ function renderInvoiceLog(invoices){
     } else if(i.status==='paid'){
       action='<span style="color:var(--green);font-size:11px">\u2713 Paid</span>';
     }
-    return '<tr><td class="name-cell">'+(i.recipient_name||'\u2014')+'<div style="font-size:11px;color:var(--text-dim);font-weight:400;margin-top:2px;">'+(i.recipient_email||'')+'</div></td><td>'+(typeLabels[i.invoice_type]||i.invoice_type)+'</td><td>'+amt+'</td><td>'+due+'</td><td>'+statusBadge+'</td><td>'+sentStr+'</td><td>'+action+'</td></tr>';
+    // Edit pencil - always visible
+    var editBtn='<button class="icon-btn" title="Edit invoice" onclick="openInvoiceEditModal(\''+i.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.375 2.625 3 3-9.75 9.75H8.625v-3l9.75-9.75Z"/></svg></button>';
+    var actionCell='<div class="row-actions">'+(action?'<span style="margin-right:4px">'+action+'</span>':'')+editBtn+'</div>';
+    return '<tr><td class="name-cell">'+(i.recipient_name||'\u2014')+'<div style="font-size:11px;color:var(--text-dim);font-weight:400;margin-top:2px;">'+(i.recipient_email||'')+'</div></td><td>'+(typeLabels[i.invoice_type]||i.invoice_type)+'</td><td>'+amt+'</td><td>'+due+'</td><td>'+statusBadge+'</td><td>'+sentStr+'</td><td>'+actionCell+'</td></tr>';
   }).join('');
 }
 
@@ -917,11 +976,20 @@ async function sendDraftInvoice(invoiceId){
         due_date: inv.due_date
       })
     });
-    var body=await res.json();
-    if(!body||!body.success)throw new Error(body&&body.error?body.error:'Stripe error');
+    var raw=await res.text();
+    var body=null;
+    try{body=raw?JSON.parse(raw):null}catch(e){body=null}
+    if(!res.ok){
+      var serverMsg=body&&body.error?body.error:(raw?raw.substring(0,200):'HTTP '+res.status);
+      throw new Error(serverMsg);
+    }
+    if(!body||!body.success){
+      throw new Error((body&&body.error)?body.error:'Workflow did not complete (check n8n executions)');
+    }
     showToast('Invoice sent!','success');
     loadInvoices();
   } catch(e){
+    console.error('Draft send failed',e);
     showToast('Send failed: '+e.message,'error');
   }
 }
@@ -1254,7 +1322,233 @@ async function checkForPasswordReset(){var hash=window.location.hash;if(hash&&ha
 async function handleResetPassword(){var pw=document.getElementById('reset-password').value,confirm=document.getElementById('reset-confirm').value,btn=document.getElementById('reset-btn'),err=document.getElementById('reset-error'),success=document.getElementById('reset-success');err.style.display='none';success.style.display='none';if(!pw||pw.length<6){err.textContent='Password must be at least 6 characters';err.style.display='block';return}if(pw!==confirm){err.textContent='Passwords do not match';err.style.display='block';return}btn.disabled=true;btn.textContent='Updating...';var{error}=await sb.auth.updateUser({password:pw});if(error){err.textContent=error.message;err.style.display='block';btn.disabled=false;btn.textContent='Set Password';return}success.textContent='Password updated! Redirecting to dashboard...';success.style.display='block';btn.style.display='none';setTimeout(function(){window.location.hash='';window.location.reload()},1500)}
 document.getElementById('reset-confirm').addEventListener('keypress',function(e){if(e.key==='Enter')handleResetPassword()});
 
-async function init(){var isReset=await checkForPasswordReset();if(!isReset)await checkSession()}
+// ============ EDIT / DELETE MODALS ============
+function openEdModal(html){
+  document.getElementById('ed-modal-content').innerHTML=html;
+  document.getElementById('ed-modal-overlay').classList.add('show');
+}
+function closeEdModal(){
+  document.getElementById('ed-modal-overlay').classList.remove('show');
+  setTimeout(function(){document.getElementById('ed-modal-content').innerHTML=''},200);
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&document.getElementById('ed-modal-overlay').classList.contains('show'))closeEdModal();
+});
+
+function esc(s){
+  if(s===null||s===undefined)return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ----- LEAD edit + delete -----
+function openLeadEditModal(sessionId){
+  var l=_leadsCache.find(function(x){return x.session_id===sessionId});
+  if(!l){showToast('Lead not found','error');return}
+  var html='<h3>Edit lead</h3><div class="ed-subtitle">'+esc(l.email||'')+'</div>'
+    +'<div class="ed-field"><label>Name</label><input id="ed-l-name" value="'+esc(l.name||'')+'"></div>'
+    +'<div class="ed-row"><div class="ed-field"><label>Email</label><input id="ed-l-email" type="email" value="'+esc(l.email||'')+'"></div>'
+    +'<div class="ed-field"><label>Phone</label><input id="ed-l-phone" value="'+esc(l.phone||'')+'" placeholder="digits only"></div></div>'
+    +'<div class="ed-row"><div class="ed-field"><label>Event Date</label><input id="ed-l-date" value="'+esc(l.date_interest||'')+'" placeholder="e.g. October 2026"></div>'
+    +'<div class="ed-field"><label>Guests</label><input id="ed-l-guests" type="number" value="'+esc(l.guest_count||'')+'"></div></div>'
+    +'<div class="ed-field"><label>Tour Date</label><input id="ed-l-tourdate" value="'+esc(l.tour_date||'')+'" placeholder="e.g. Apr 21 at 8:00 AM"></div>'
+    +'<div class="ed-field"><label>Staff Notes</label><textarea id="ed-l-notes">'+esc(l.staff_notes||'')+'</textarea></div>'
+    +'<div class="ed-actions">'
+    +'<button class="ed-btn ed-btn-danger" onclick="openLeadDeleteConfirm(\''+esc(sessionId)+'\')">Delete Lead</button>'
+    +'<div style="flex:1"></div>'
+    +'<button class="ed-btn ed-btn-secondary" onclick="closeEdModal()">Cancel</button>'
+    +'<button class="ed-btn ed-btn-primary" onclick="saveLeadEdit(\''+esc(sessionId)+'\')">Save changes</button>'
+    +'</div>';
+  openEdModal(html);
+}
+
+async function saveLeadEdit(sessionId){
+  var updates={
+    name: document.getElementById('ed-l-name').value.trim()||null,
+    email: document.getElementById('ed-l-email').value.trim()||null,
+    phone: document.getElementById('ed-l-phone').value.replace(/\D/g,'')||null,
+    date_interest: document.getElementById('ed-l-date').value.trim()||null,
+    guest_count: parseInt(document.getElementById('ed-l-guests').value)||null,
+    tour_date: document.getElementById('ed-l-tourdate').value.trim()||null,
+    staff_notes: document.getElementById('ed-l-notes').value.trim()||null
+  };
+  var{error}=await sb.from('leads').update(updates).eq('session_id',sessionId);
+  if(error){showToast('Save failed: '+error.message,'error');return}
+  showToast('Lead updated','success');
+  closeEdModal();
+  loadLeads();
+}
+
+async function openLeadDeleteConfirm(sessionId){
+  // Preview cascade impact
+  var{data:preview,error}=await sb.rpc('preview_lead_delete',{p_session_id:sessionId});
+  if(error){showToast('Preview failed: '+error.message,'error');return}
+  if(!preview||!preview.found){showToast('Lead not found','error');return}
+
+  var impact='';
+  if(preview.invoice_count>0)impact+='<li><strong>'+preview.invoice_count+'</strong> invoice record'+(preview.invoice_count===1?'':'s')+' will be deleted</li>';
+  if(preview.session_count>0)impact+='<li><strong>'+preview.session_count+'</strong> session/conversation record'+(preview.session_count===1?'':'s')+' will be deleted</li>';
+  if(!impact)impact='<li>No related records</li>';
+
+  var html='<h3 style="color:var(--red)">Delete lead permanently?</h3>'
+    +'<div class="ed-subtitle">'+esc(preview.lead_name||'Unknown')+' \u00b7 '+esc(preview.lead_email||'no email')+'</div>'
+    +'<div class="ed-warning"><strong>This cannot be undone.</strong> Deleting this lead will also remove:<ul>'+impact+'</ul></div>'
+    +'<div class="ed-field"><label>Type <strong style="color:var(--red);letter-spacing:0.1em">DELETE</strong> to confirm</label>'
+    +'<input id="ed-l-confirm" class="ed-confirm-input" placeholder="DELETE" oninput="document.getElementById(\'ed-l-del-btn\').disabled=this.value!==\'DELETE\'"></div>'
+    +'<div class="ed-actions">'
+    +'<button class="ed-btn ed-btn-secondary" onclick="openLeadEditModal(\''+esc(sessionId)+'\')">Back</button>'
+    +'<button id="ed-l-del-btn" class="ed-btn ed-btn-danger" disabled onclick="confirmLeadDelete(\''+esc(sessionId)+'\')">Delete forever</button>'
+    +'</div>';
+  openEdModal(html);
+}
+
+async function confirmLeadDelete(sessionId){
+  var btn=document.getElementById('ed-l-del-btn');
+  btn.disabled=true;btn.textContent='Deleting...';
+  var{data,error}=await sb.rpc('hard_delete_lead',{p_session_id:sessionId});
+  if(error){showToast('Delete failed: '+error.message,'error');btn.disabled=false;btn.textContent='Delete forever';return}
+  if(!data||!data.success){showToast('Delete failed: '+((data&&data.error)||'unknown'),'error');btn.disabled=false;btn.textContent='Delete forever';return}
+  var msg='Lead deleted';
+  if(data.invoices_deleted>0)msg+=' \u00b7 '+data.invoices_deleted+' invoice(s)';
+  if(data.sessions_deleted>0)msg+=' \u00b7 '+data.sessions_deleted+' session(s)';
+  showToast(msg,'success');
+  closeEdModal();
+  loadLeads();
+}
+
+// ----- INVOICE edit + void -----
+function openInvoiceEditModal(invoiceId){
+  var i=_invoicesCache.find(function(x){return x.id===invoiceId});
+  if(!i){showToast('Invoice not found','error');return}
+  var isLocked=(i.status==='sent'||i.status==='paid'||i.status==='void');
+  var typeOpts=[['deposit','Deposit'],['second_payment','2nd Payment'],['final_balance','Final Balance'],['add_on','Add-on'],['other','Other']].map(function(o){
+    return '<option value="'+o[0]+'"'+(i.invoice_type===o[0]?' selected':'')+'>'+o[1]+'</option>';
+  }).join('');
+  var lockedNotice=isLocked?'<div class="ed-warning" style="background:var(--amber-soft);border-color:rgba(245,158,11,0.25);color:rgba(255,230,180,0.95)"><strong>Read-only.</strong> This invoice is <strong>'+i.status+'</strong>. Amount, type, recipient, and due date cannot be changed. You can still edit the internal description.</div>':'';
+
+  var amt=parseFloat(i.amount).toFixed(2);
+  var html='<h3>'+(isLocked?'View':'Edit')+' invoice</h3>'
+    +'<div class="ed-subtitle">'+esc(i.recipient_name||'')+' \u00b7 $'+esc(amt)+' \u00b7 status: '+esc(i.status)+'</div>'
+    +lockedNotice
+    +'<div class="ed-row"><div class="ed-field"><label>Invoice Type</label><select id="ed-i-type"'+(isLocked?' disabled':'')+'>'+typeOpts+'</select></div>'
+    +'<div class="ed-field"><label>Amount ($)</label><input id="ed-i-amount" type="number" step="0.01" min="0.01" value="'+esc(amt)+'"'+(isLocked?' disabled':'')+'></div></div>'
+    +'<div class="ed-field"><label>Description</label><input id="ed-i-desc" value="'+esc(i.description||'')+'"></div>'
+    +'<div class="ed-row"><div class="ed-field"><label>Due Date</label><input id="ed-i-due" type="date" value="'+esc(i.due_date||'')+'"'+(isLocked?' disabled':'')+' style="color-scheme:dark"></div>'
+    +'<div class="ed-field"><label>Recipient Email</label><input id="ed-i-email" type="email" value="'+esc(i.recipient_email||'')+'"'+(isLocked?' disabled':'')+'></div></div>'
+    +'<div class="ed-actions">';
+
+  if(i.status==='draft'){
+    html+='<button class="ed-btn ed-btn-danger" onclick="openInvoiceDeleteConfirm(\''+esc(invoiceId)+'\')">Delete draft</button>';
+  } else if(i.status==='sent'){
+    html+='<button class="ed-btn ed-btn-danger" onclick="openInvoiceVoidConfirm(\''+esc(invoiceId)+'\')">Void invoice</button>';
+  }
+  html+='<div style="flex:1"></div>'
+    +'<button class="ed-btn ed-btn-secondary" onclick="closeEdModal()">Close</button>'
+    +'<button class="ed-btn ed-btn-primary" onclick="saveInvoiceEdit(\''+esc(invoiceId)+'\')">Save changes</button>'
+    +'</div>';
+  openEdModal(html);
+}
+
+async function saveInvoiceEdit(invoiceId){
+  var i=_invoicesCache.find(function(x){return x.id===invoiceId});
+  if(!i){showToast('Invoice not found','error');return}
+  var isLocked=(i.status==='sent'||i.status==='paid'||i.status==='void');
+  var updates={};
+  // Always editable
+  updates.description=document.getElementById('ed-i-desc').value.trim()||null;
+  // Only on drafts
+  if(!isLocked){
+    var amount=parseFloat(document.getElementById('ed-i-amount').value);
+    if(!amount||amount<=0){showToast('Invalid amount','error');return}
+    var email=document.getElementById('ed-i-email').value.trim();
+    if(!email){showToast('Email required','error');return}
+    updates.invoice_type=document.getElementById('ed-i-type').value;
+    updates.amount=amount;
+    updates.due_date=document.getElementById('ed-i-due').value||null;
+    updates.recipient_email=email;
+  }
+  var{error}=await sb.from('invoices').update(updates).eq('id',invoiceId);
+  if(error){showToast('Save failed: '+error.message,'error');return}
+  showToast('Invoice updated','success');
+  closeEdModal();
+  loadInvoices();
+}
+
+async function openInvoiceDeleteConfirm(invoiceId){
+  var i=_invoicesCache.find(function(x){return x.id===invoiceId});
+  if(!i){showToast('Invoice not found','error');return}
+  if(i.status!=='draft'){showToast('Only drafts can be deleted','error');return}
+  var html='<h3 style="color:var(--red)">Delete draft?</h3>'
+    +'<div class="ed-subtitle">'+esc(i.recipient_name||'')+' \u00b7 $'+esc(parseFloat(i.amount).toFixed(2))+'</div>'
+    +'<div class="ed-warning"><strong>This draft will be permanently removed.</strong> Since it was never sent to Stripe, no other systems are affected.</div>'
+    +'<div class="ed-field"><label>Type <strong style="color:var(--red);letter-spacing:0.1em">DELETE</strong> to confirm</label>'
+    +'<input id="ed-i-confirm" class="ed-confirm-input" placeholder="DELETE" oninput="document.getElementById(\'ed-i-del-btn\').disabled=this.value!==\'DELETE\'"></div>'
+    +'<div class="ed-actions">'
+    +'<button class="ed-btn ed-btn-secondary" onclick="openInvoiceEditModal(\''+esc(invoiceId)+'\')">Back</button>'
+    +'<button id="ed-i-del-btn" class="ed-btn ed-btn-danger" disabled onclick="confirmInvoiceDelete(\''+esc(invoiceId)+'\')">Delete draft</button>'
+    +'</div>';
+  openEdModal(html);
+}
+
+async function confirmInvoiceDelete(invoiceId){
+  var btn=document.getElementById('ed-i-del-btn');
+  btn.disabled=true;btn.textContent='Deleting...';
+  var{error}=await sb.from('invoices').delete().eq('id',invoiceId);
+  if(error){showToast('Delete failed: '+error.message,'error');btn.disabled=false;btn.textContent='Delete draft';return}
+  showToast('Draft deleted','success');
+  closeEdModal();
+  loadInvoices();
+}
+
+async function openInvoiceVoidConfirm(invoiceId){
+  var i=_invoicesCache.find(function(x){return x.id===invoiceId});
+  if(!i){showToast('Invoice not found','error');return}
+  if(i.status!=='sent'){showToast('Only sent invoices can be voided','error');return}
+  var html='<h3 style="color:var(--red)">Void this invoice?</h3>'
+    +'<div class="ed-subtitle">'+esc(i.recipient_name||'')+' \u00b7 $'+esc(parseFloat(i.amount).toFixed(2))+'</div>'
+    +'<div class="ed-warning"><strong>This will void the invoice in Stripe.</strong> The customer\'s payment link will stop working. Voided invoices cannot be un-voided \u2014 you would need to send a new invoice. The record stays in your log for auditing.</div>'
+    +'<div class="ed-field"><label>Type <strong style="color:var(--red);letter-spacing:0.1em">DELETE</strong> to confirm</label>'
+    +'<input id="ed-i-void-confirm" class="ed-confirm-input" placeholder="DELETE" oninput="document.getElementById(\'ed-i-void-btn\').disabled=this.value!==\'DELETE\'"></div>'
+    +'<div class="ed-actions">'
+    +'<button class="ed-btn ed-btn-secondary" onclick="openInvoiceEditModal(\''+esc(invoiceId)+'\')">Back</button>'
+    +'<button id="ed-i-void-btn" class="ed-btn ed-btn-danger" disabled onclick="confirmInvoiceVoid(\''+esc(invoiceId)+'\')">Void invoice</button>'
+    +'</div>';
+  openEdModal(html);
+}
+
+async function confirmInvoiceVoid(invoiceId){
+  var i=_invoicesCache.find(function(x){return x.id===invoiceId});
+  if(!i){showToast('Invoice not found','error');return}
+  var btn=document.getElementById('ed-i-void-btn');
+  btn.disabled=true;btn.textContent='Voiding...';
+  if(!i.stripe_invoice_id){
+    // No Stripe ID means it was never actually sent \u2014 just flip status locally
+    var{error:e1}=await sb.from('invoices').update({status:'void',voided_at:new Date().toISOString()}).eq('id',invoiceId);
+    if(e1){showToast('Void failed: '+e1.message,'error');btn.disabled=false;btn.textContent='Void invoice';return}
+    showToast('Invoice marked void','success');
+    closeEdModal();loadInvoices();return;
+  }
+  // Call n8n to void in Stripe + flip status
+  try{
+    var res=await fetch('https://zentrust.app.n8n.cloud/webhook/void-invoice',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({invoice_id:invoiceId,stripe_invoice_id:i.stripe_invoice_id})
+    });
+    var raw=await res.text();
+    var body=null;try{body=raw?JSON.parse(raw):null}catch(e){body=null}
+    if(!res.ok||!body||!body.success){
+      throw new Error((body&&body.error)||('HTTP '+res.status+(raw?': '+raw.substring(0,120):'')));
+    }
+    showToast('Invoice voided in Stripe','success');
+    closeEdModal();loadInvoices();
+  }catch(e){
+    console.error('Void failed',e);
+    showToast('Void failed: '+e.message,'error');
+    btn.disabled=false;btn.textContent='Void invoice';
+  }
+}
+
+
 init();
 </script>
 </body>
