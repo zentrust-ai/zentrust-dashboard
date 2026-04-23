@@ -300,16 +300,100 @@ th.sortable.active .sort-arrow{opacity:1}
 
     <!-- INVOICES (unchanged) -->
     <div id="page-invoices" style="display:none;">
-      <div class="page-header"><div><div class="page-title">Invoices</div><div class="page-venue">Send deposit invoices to leads via Stripe</div></div></div>
-      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
-        <div class="metric-card"><div class="metric-label label-accent">Invoices Sent</div><div class="metric-value" id="inv-sent">&mdash;</div><div class="metric-sub">All time</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Paid</div><div class="metric-value" id="inv-paid">&mdash;</div><div class="metric-sub" id="inv-rate">&mdash;</div></div>
-        <div class="metric-card"><div class="metric-label label-green">Collected</div><div class="metric-value" id="inv-amount">&mdash;</div><div class="metric-sub">Total deposits received</div></div>
+      <div class="page-header"><div><div class="page-title">Invoices</div><div class="page-venue">Send Stripe invoices and track payment status</div></div></div>
+
+      <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:28px;">
+        <div class="metric-card"><div class="metric-label label-accent">Sent</div><div class="metric-value" id="inv-m-sent">&mdash;</div><div class="metric-sub" id="inv-m-outstanding">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-green">Paid</div><div class="metric-value" id="inv-m-paid">&mdash;</div><div class="metric-sub" id="inv-m-collected">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label" style="color:var(--red)">Overdue</div><div class="metric-value" id="inv-m-overdue">&mdash;</div><div class="metric-sub" id="inv-m-overdue-amt">&mdash;</div></div>
+        <div class="metric-card"><div class="metric-label label-amber">Drafts</div><div class="metric-value" id="inv-m-drafts">&mdash;</div><div class="metric-sub">Not sent yet</div></div>
+      </div>
+
+      <!-- Send Invoice Form -->
+      <div class="table-card" style="margin-bottom:24px;padding:24px 28px;">
+        <div style="font-size:14px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Send new invoice
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="grid-column:1/-1;">
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Lead</label>
+            <div style="position:relative;">
+              <input type="text" id="inv-lead-input" placeholder="Type name or select from recent leads..." autocomplete="off" oninput="onLeadInputChange()" onfocus="showLeadDropdown()" style="width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s">
+              <div id="inv-lead-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:8px;max-height:260px;overflow-y:auto;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,0.3);"></div>
+            </div>
+            <div id="inv-lead-context" style="display:none;margin-top:8px;padding:10px 14px;background:var(--accent-soft);border-radius:8px;font-size:12px;color:var(--text-secondary);">
+              <span id="inv-lead-context-text"></span>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Invoice Type</label>
+            <select id="inv-type" class="filter-select" style="width:100%">
+              <option value="deposit">Deposit</option>
+              <option value="second_payment">2nd Payment</option>
+              <option value="final_balance">Final Balance</option>
+              <option value="add_on">Add-on</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Amount ($)</label>
+            <input type="number" id="inv-amount" placeholder="500.00" min="1" step="0.01" style="width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;">
+          </div>
+
+          <div style="grid-column:1/-1;">
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Description</label>
+            <input type="text" id="inv-description" placeholder="e.g. Event deposit \u2014 Oct 15 2026 wedding" style="width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;">
+          </div>
+
+          <div>
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Due Date <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            <input type="date" id="inv-due-date" style="width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;color-scheme:dark;">
+          </div>
+
+          <div>
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Send to email <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;">(optional override)</span></label>
+            <input type="email" id="inv-email-override" placeholder="Defaults to lead's email" style="width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;">
+          </div>
+
+          <div style="grid-column:1/-1;display:flex;gap:10px;margin-top:6px;">
+            <button onclick="sendNewInvoice()" id="inv-send-btn" style="padding:11px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s;">Send Invoice</button>
+            <button onclick="saveDraftInvoice()" style="padding:11px 24px;background:none;border:1px solid var(--border);color:var(--text-secondary);border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;">Save Draft</button>
+            <button onclick="clearInvoiceForm()" style="padding:11px 18px;background:none;border:1px solid var(--border);color:var(--text-dim);border-radius:8px;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Invoices Log -->
+      <div class="filters-bar">
+        <div class="filter-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="inv-log-search" placeholder="Search invoices..." oninput="applyInvoiceFilters()">
+        </div>
+        <select class="filter-select" id="inv-log-status" onchange="applyInvoiceFilters()">
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="sent">Sent</option>
+          <option value="paid">Paid</option>
+          <option value="overdue">Overdue</option>
+          <option value="void">Void</option>
+        </select>
+        <select class="filter-select" id="inv-log-type" onchange="applyInvoiceFilters()">
+          <option value="">All types</option>
+          <option value="deposit">Deposit</option>
+          <option value="second_payment">2nd Payment</option>
+          <option value="final_balance">Final Balance</option>
+          <option value="add_on">Add-on</option>
+          <option value="other">Other</option>
+        </select>
+        <button class="filter-clear" onclick="clearInvoiceFilterControls()">Clear</button>
       </div>
       <div class="table-card">
-        <div class="table-header"><h3>Leads Ready for Invoicing</h3><div class="table-count" id="inv-count">&mdash;</div></div>
+        <div class="table-header"><h3>Recent Invoices</h3><div class="table-count" id="inv-log-count">&mdash;</div></div>
         <div style="overflow-x:auto;">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Event Date</th><th>Guests</th><th>Deposit Status</th><th>Amount</th><th>Action</th></tr></thead><tbody id="inv-tbody"></tbody></table>
+          <table><thead><tr><th>Name</th><th>Type</th><th>Amount</th><th>Due</th><th>Status</th><th class="sortable active" id="inv-log-sort" onclick="toggleInvoiceSort()">Sent <span class="sort-arrow" id="inv-log-sort-arrow">&darr;</span></th><th>Action</th></tr></thead><tbody id="inv-log-tbody"></tbody></table>
         </div>
       </div>
     </div>
@@ -346,21 +430,6 @@ th.sortable.active .sort-arrow{opacity:1}
   </div>
 </div>
 
-<!-- INVOICE MODAL (unchanged) -->
-<div class="modal-overlay" id="invoice-modal">
-  <div class="modal">
-    <h3>Send Deposit Invoice</h3>
-    <div class="modal-field"><label>Lead</label><input type="text" id="inv-modal-name" disabled></div>
-    <div class="modal-field"><label>Email</label><input type="text" id="inv-modal-email" disabled></div>
-    <div class="modal-field"><label>Deposit Amount ($)</label><input type="number" id="inv-modal-amount" placeholder="500.00" min="1" step="0.01"></div>
-    <div class="modal-field"><label>Description</label><input type="text" id="inv-modal-desc" placeholder="Event deposit"></div>
-    <div class="modal-actions">
-      <button onclick="closeInvoiceModal()" style="background:none;border:1px solid var(--border);color:var(--text-secondary)">Cancel</button>
-      <button onclick="sendInvoice()" style="background:var(--accent);color:#fff;border:none">Send Invoice</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -368,7 +437,6 @@ const SUPABASE_URL='https://wjwjylmixdwkxpraykyf.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqd2p5bG1peGR3a3hwcmF5a3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzUxNTUsImV4cCI6MjA4ODA1MTE1NX0.fDNNnmqpHijSfKOZqDiIzgR0_3xx7ZiCSc-xVuqOvBg';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 var currentUser=null,userRole=null,userVenueId=null,selectedVenue='all',venueMap={};
-var invoiceSessionId=null;
 // Caches for filtering without re-fetching
 var _leadsCache=[],_fuLeadsCache=[];
 var _leadsDateType='created';
@@ -555,38 +623,301 @@ document.getElementById('rev-tbody').innerHTML=revLeads.map(function(l){var stat
 
 async function markEventBooked(sessionId){var{error}=await sb.from('leads').update({event_booked:true,event_booked_at:new Date().toISOString()}).eq('session_id',sessionId);if(error){showToast('Error: '+error.message,'error')}else{showToast('Event marked as booked!','success');loadRevenue();loadOverview()}}
 
-// ============ INVOICES (venue column removed from render) ============
-async function loadInvoices(){var query=sb.from('recent_leads').select('*').limit(200);if(selectedVenue!=='all')query=query.eq('venue_id',selectedVenue);var{data:leads}=await query;if(!leads)leads=[];
-var invoiceable=leads.filter(function(l){return l.tour_booked&&l.name&&l.email});var sent=leads.filter(function(l){return l.deposit_sent});var paid=leads.filter(function(l){return l.deposit_paid});var collected=paid.reduce(function(s,l){return s+(parseFloat(l.deposit_amount)||0)},0);
-document.getElementById('inv-sent').textContent=sent.length;document.getElementById('inv-paid').textContent=paid.length;document.getElementById('inv-rate').textContent=sent.length>0?Math.round(paid.length/sent.length*100)+'% paid':'\u2014';document.getElementById('inv-amount').textContent='$'+collected.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});document.getElementById('inv-count').textContent=invoiceable.length+' leads';
-if(!invoiceable.length){document.getElementById('inv-tbody').innerHTML='<tr><td colspan="7" class="empty-state">No leads ready for invoicing yet</td></tr>';return}
-document.getElementById('inv-tbody').innerHTML=invoiceable.map(function(l){var depStatus='';if(l.deposit_paid)depStatus='<span class="badge badge-green">Paid</span>';else if(l.deposit_sent)depStatus='<span class="badge badge-amber">Sent</span>';else depStatus='<span class="badge badge-dim">Not Sent</span>';var depAmt=l.deposit_amount?'$'+parseFloat(l.deposit_amount).toLocaleString('en-US',{minimumFractionDigits:2}):'\u2014';var actionBtn='';if(l.deposit_paid){actionBtn='<span style="color:var(--green);font-size:11px">\u2713 Paid</span>'}else if(l.deposit_sent){actionBtn='<button onclick="markDepositPaid(\''+l.session_id+'\')" class="action-btn action-btn-green">Mark Paid</button>'}else{actionBtn='<button onclick="openInvoiceModal(\''+l.session_id+'\',\''+encodeURIComponent(l.name||'')+'\',\''+encodeURIComponent(l.email||'')+'\')" class="action-btn action-btn-accent">Send Invoice</button>'}return'<tr><td class="name-cell">'+(l.name||'\u2014')+'</td><td>'+(l.email||'\u2014')+'</td><td>'+(l.date_interest||'\u2014')+'</td><td>'+(l.guest_count||'\u2014')+'</td><td>'+depStatus+'</td><td>'+depAmt+'</td><td>'+actionBtn+'</td></tr>'}).join('')}
+// ============ INVOICES v2 (new architecture with invoices table) ============
+var _invLeadsCache=[], _invoicesCache=[], _invSelectedLead=null, _invSortDir='desc';
 
-function openInvoiceModal(sessionId,name,email){invoiceSessionId=sessionId;document.getElementById('inv-modal-name').value=decodeURIComponent(name);document.getElementById('inv-modal-email').value=decodeURIComponent(email);document.getElementById('inv-modal-amount').value='';document.getElementById('inv-modal-desc').value='Event deposit';document.getElementById('invoice-modal').classList.add('show')}
-function closeInvoiceModal(){document.getElementById('invoice-modal').classList.remove('show');invoiceSessionId=null}
+async function loadInvoices(){
+  // Load all leads for the dropdown (used by lead picker)
+  var lq=sb.from('recent_leads').select('session_id,name,email,date_interest,guest_count,tour_date,lead_status,venue_id,id').limit(500);
+  if(selectedVenue!=='all')lq=lq.eq('venue_id',selectedVenue);
+  var{data:leadRows}=await lq;
+  _invLeadsCache=leadRows||[];
 
-async function sendInvoice(){
-  var amount=parseFloat(document.getElementById('inv-modal-amount').value);
-  var desc=document.getElementById('inv-modal-desc').value||'Event deposit';
-  var email=document.getElementById('inv-modal-email').value;
-  var name=document.getElementById('inv-modal-name').value;
-  if(!amount||amount<=0){showToast('Please enter a valid amount','error');return}
-  showToast('Sending invoice...','success');
-  try {
-    var res = await fetch('https://zentrust.app.n8n.cloud/webhook/send-invoice', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email:email,name:name,amount:amount,description:desc,session_id:invoiceSessionId})
-    });
-    var data = await res.json();
-    if (!data.success) throw new Error('Stripe error');
-    await sb.from('leads').update({deposit_sent:true,deposit_amount:amount,deposit_sent_at:new Date().toISOString()}).eq('session_id',invoiceSessionId);
-    showToast('Invoice for $'+amount.toLocaleString()+' sent!','success');
-    closeInvoiceModal();loadInvoices();
-  } catch(e) { showToast('Error sending invoice: '+e.message,'error') }
+  // Load all invoices with lead context
+  var iq=sb.from('invoices_with_lead').select('*').order('created_at',{ascending:false}).limit(500);
+  if(selectedVenue!=='all')iq=iq.eq('venue_id',selectedVenue);
+  var{data:invs,error}=await iq;
+  if(error){
+    showToast('Error loading invoices: '+error.message,'error');
+    _invoicesCache=[];
+  } else {
+    _invoicesCache=invs||[];
+  }
+
+  // Compute metrics
+  var sent=_invoicesCache.filter(function(i){return i.status==='sent'});
+  var paid=_invoicesCache.filter(function(i){return i.status==='paid'});
+  var overdue=_invoicesCache.filter(function(i){return i.is_overdue});
+  var drafts=_invoicesCache.filter(function(i){return i.status==='draft'});
+  var outstanding=sent.reduce(function(s,i){return s+(parseFloat(i.amount)||0)},0);
+  var collected=paid.reduce(function(s,i){return s+(parseFloat(i.amount)||0)},0);
+  var overdueAmt=overdue.reduce(function(s,i){return s+(parseFloat(i.amount)||0)},0);
+
+  document.getElementById('inv-m-sent').textContent=sent.length;
+  document.getElementById('inv-m-outstanding').textContent='$'+outstanding.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' outstanding';
+  document.getElementById('inv-m-paid').textContent=paid.length;
+  document.getElementById('inv-m-collected').textContent='$'+collected.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' collected';
+  document.getElementById('inv-m-overdue').textContent=overdue.length;
+  document.getElementById('inv-m-overdue-amt').textContent=overdue.length>0?'$'+overdueAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' past due':'None past due';
+  document.getElementById('inv-m-drafts').textContent=drafts.length;
+
+  applyInvoiceFilters();
 }
 
-async function markDepositPaid(sessionId){var{error}=await sb.from('leads').update({deposit_paid:true,deposit_paid_at:new Date().toISOString()}).eq('session_id',sessionId);if(error){showToast('Error: '+error.message,'error')}else{showToast('Deposit marked as paid!','success');loadInvoices()}}
+// ----- Lead picker dropdown -----
+function showLeadDropdown(){
+  renderLeadDropdown(document.getElementById('inv-lead-input').value);
+  document.getElementById('inv-lead-dropdown').style.display='block';
+}
+document.addEventListener('click',function(e){
+  var wrap=document.getElementById('inv-lead-input');
+  var dd=document.getElementById('inv-lead-dropdown');
+  if(!wrap||!dd)return;
+  if(!wrap.contains(e.target)&&!dd.contains(e.target))dd.style.display='none';
+});
+
+function onLeadInputChange(){
+  var v=document.getElementById('inv-lead-input').value;
+  renderLeadDropdown(v);
+  document.getElementById('inv-lead-dropdown').style.display='block';
+  // If the typed value no longer matches selected lead, clear selection
+  if(_invSelectedLead&&v!==_invSelectedLead.name){
+    _invSelectedLead=null;
+    document.getElementById('inv-lead-context').style.display='none';
+  }
+}
+
+function renderLeadDropdown(search){
+  search=(search||'').toLowerCase().trim();
+  var matches=_invLeadsCache.filter(function(l){
+    if(!search)return true;
+    var n=(l.name||'').toLowerCase();
+    var e=(l.email||'').toLowerCase();
+    return n.indexOf(search)>-1||e.indexOf(search)>-1;
+  }).slice(0,10);
+  var dd=document.getElementById('inv-lead-dropdown');
+  if(!matches.length){
+    dd.innerHTML='<div style="padding:12px 14px;font-size:12px;color:var(--text-dim);">No matching leads</div>';
+    return;
+  }
+  dd.innerHTML=matches.map(function(l){
+    var sub=(l.date_interest||'\u2014')+(l.guest_count?' \u00b7 '+l.guest_count+' guests':'');
+    return '<div class="inv-lead-opt" onclick="selectLead(\''+l.session_id+'\')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseover="this.style.background=\'rgba(255,255,255,0.04)\'" onmouseout="this.style.background=\'\'"><div style="font-size:13px;font-weight:500;color:var(--text);">'+(l.name||'Unnamed')+'</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px;">'+(l.email||'no email')+' \u00b7 '+sub+'</div></div>';
+  }).join('');
+}
+
+function selectLead(sessionId){
+  var lead=_invLeadsCache.find(function(l){return l.session_id===sessionId});
+  if(!lead)return;
+  _invSelectedLead=lead;
+  document.getElementById('inv-lead-input').value=lead.name||'';
+  document.getElementById('inv-lead-dropdown').style.display='none';
+  // Auto-populate description with lead context
+  var desc=document.getElementById('inv-description');
+  if(!desc.value){
+    var typeLabel=document.getElementById('inv-type').selectedOptions[0].textContent;
+    desc.value=typeLabel+(lead.date_interest?' \u2014 '+lead.date_interest+' event':'');
+  }
+  // Show context
+  var ctx='<strong>'+lead.email+'</strong>';
+  if(lead.date_interest)ctx+=' \u00b7 Event '+lead.date_interest;
+  if(lead.guest_count)ctx+=' \u00b7 '+lead.guest_count+' guests';
+  if(lead.tour_date)ctx+=' \u00b7 Toured '+lead.tour_date;
+  document.getElementById('inv-lead-context-text').innerHTML=ctx;
+  document.getElementById('inv-lead-context').style.display='block';
+}
+
+function clearInvoiceForm(){
+  document.getElementById('inv-lead-input').value='';
+  document.getElementById('inv-type').value='deposit';
+  document.getElementById('inv-amount').value='';
+  document.getElementById('inv-description').value='';
+  document.getElementById('inv-due-date').value='';
+  document.getElementById('inv-email-override').value='';
+  document.getElementById('inv-lead-context').style.display='none';
+  _invSelectedLead=null;
+}
+
+// ----- Save / Send -----
+function getFormData(){
+  var amount=parseFloat(document.getElementById('inv-amount').value);
+  var desc=document.getElementById('inv-description').value.trim();
+  var invType=document.getElementById('inv-type').value;
+  var dueDate=document.getElementById('inv-due-date').value||null;
+  var emailOverride=document.getElementById('inv-email-override').value.trim();
+  if(!_invSelectedLead){showToast('Select a lead first','error');return null}
+  if(!amount||amount<=0){showToast('Enter a valid amount','error');return null}
+  var recipientEmail=emailOverride||_invSelectedLead.email;
+  if(!recipientEmail){showToast('No email for this lead','error');return null}
+  return {
+    lead_id: _invSelectedLead.id,
+    session_id: _invSelectedLead.session_id,
+    venue_id: _invSelectedLead.venue_id,
+    invoice_type: invType,
+    amount: amount,
+    description: desc||null,
+    due_date: dueDate,
+    recipient_name: _invSelectedLead.name||'Unknown',
+    recipient_email: recipientEmail,
+    created_by: currentUser?currentUser.email:null
+  };
+}
+
+async function saveDraftInvoice(){
+  var data=getFormData();
+  if(!data)return;
+  data.status='draft';
+  var{error}=await sb.from('invoices').insert(data);
+  if(error){showToast('Error: '+error.message,'error');return}
+  showToast('Draft saved','success');
+  clearInvoiceForm();
+  loadInvoices();
+}
+
+async function sendNewInvoice(){
+  var data=getFormData();
+  if(!data)return;
+  data.status='draft';
+  var btn=document.getElementById('inv-send-btn');
+  btn.disabled=true;btn.textContent='Sending...';
+  // 1. Insert the draft row first
+  var{data:inserted,error:insErr}=await sb.from('invoices').insert(data).select().single();
+  if(insErr||!inserted){
+    showToast('Error saving: '+(insErr?insErr.message:'unknown'),'error');
+    btn.disabled=false;btn.textContent='Send Invoice';return;
+  }
+  // 2. Call n8n webhook to create Stripe invoice
+  try {
+    var res=await fetch('https://zentrust.app.n8n.cloud/webhook/send-invoice',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        invoice_id: inserted.id,
+        email: data.recipient_email,
+        name: data.recipient_name,
+        amount: data.amount,
+        description: data.description||(data.invoice_type+' invoice'),
+        session_id: data.session_id,
+        due_date: data.due_date
+      })
+    });
+    var body=await res.json();
+    if(!body||!body.success)throw new Error(body&&body.error?body.error:'Stripe error');
+    showToast('Invoice for $'+data.amount.toLocaleString()+' sent!','success');
+    clearInvoiceForm();
+    loadInvoices();
+  } catch(e){
+    showToast('Send failed: '+e.message+' (saved as draft)','error');
+    loadInvoices();
+  } finally {
+    btn.disabled=false;btn.textContent='Send Invoice';
+  }
+}
+
+// ----- Log filters + sort + render -----
+function applyInvoiceFilters(){
+  var search=(document.getElementById('inv-log-search').value||'').toLowerCase().trim();
+  var status=document.getElementById('inv-log-status').value;
+  var type=document.getElementById('inv-log-type').value;
+  var filtered=_invoicesCache.filter(function(i){
+    if(search){
+      var n=(i.recipient_name||'').toLowerCase();
+      var e=(i.recipient_email||'').toLowerCase();
+      var d=(i.description||'').toLowerCase();
+      if(n.indexOf(search)===-1&&e.indexOf(search)===-1&&d.indexOf(search)===-1)return false;
+    }
+    if(status){
+      if(status==='overdue'){if(!i.is_overdue)return false}
+      else if(i.status!==status)return false;
+    }
+    if(type&&i.invoice_type!==type)return false;
+    return true;
+  });
+  renderInvoiceLog(filtered);
+}
+
+function clearInvoiceFilterControls(){
+  document.getElementById('inv-log-search').value='';
+  document.getElementById('inv-log-status').value='';
+  document.getElementById('inv-log-type').value='';
+  applyInvoiceFilters();
+}
+
+function toggleInvoiceSort(){
+  _invSortDir=_invSortDir==='desc'?'asc':'desc';
+  document.getElementById('inv-log-sort-arrow').innerHTML=_invSortDir==='desc'?'&darr;':'&uarr;';
+  applyInvoiceFilters();
+}
+
+function renderInvoiceLog(invoices){
+  var sorted=invoices.slice().sort(function(a,b){
+    var ta=a.sent_at||a.created_at;
+    var tb=b.sent_at||b.created_at;
+    var da=ta?new Date(ta).getTime():0;
+    var db=tb?new Date(tb).getTime():0;
+    return _invSortDir==='desc'?db-da:da-db;
+  });
+  document.getElementById('inv-log-count').textContent=sorted.length+' invoices';
+  if(!sorted.length){
+    document.getElementById('inv-log-tbody').innerHTML='<tr><td colspan="7" class="empty-state">No invoices yet \u2014 create one above</td></tr>';
+    return;
+  }
+  var typeLabels={deposit:'Deposit',second_payment:'2nd Payment',final_balance:'Final Balance',add_on:'Add-on',other:'Other'};
+  document.getElementById('inv-log-tbody').innerHTML=sorted.map(function(i){
+    var amt='$'+parseFloat(i.amount).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var due=i.due_date?new Date(i.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014';
+    var sentDate=i.sent_at||i.created_at;
+    var sentStr=sentDate?new Date(sentDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014';
+    var statusBadge;
+    if(i.status==='paid')statusBadge='<span class="badge badge-green">Paid</span>';
+    else if(i.status==='void')statusBadge='<span class="badge badge-dim">Void</span>';
+    else if(i.is_overdue)statusBadge='<span class="badge badge-red">Overdue'+(i.days_until_due!==null?' '+Math.abs(i.days_until_due)+'d':'')+'</span>';
+    else if(i.status==='sent')statusBadge='<span class="badge badge-amber">Sent</span>';
+    else statusBadge='<span class="badge badge-dim">Draft</span>';
+    var action='';
+    if(i.status==='draft'){
+      action='<button onclick="sendDraftInvoice(\''+i.id+'\')" class="action-btn action-btn-accent">Send</button>';
+    } else if(i.status==='sent'){
+      var openBtn=i.stripe_hosted_url?'<a href="'+i.stripe_hosted_url+'" target="_blank" class="action-btn action-btn-outline" style="text-decoration:none;display:inline-block;">View</a> ':'';
+      action=openBtn+'<button onclick="markInvoicePaid(\''+i.id+'\')" class="action-btn action-btn-green">Mark Paid</button>';
+    } else if(i.status==='paid'){
+      action='<span style="color:var(--green);font-size:11px">\u2713 Paid</span>';
+    }
+    return '<tr><td class="name-cell">'+(i.recipient_name||'\u2014')+'<div style="font-size:11px;color:var(--text-dim);font-weight:400;margin-top:2px;">'+(i.recipient_email||'')+'</div></td><td>'+(typeLabels[i.invoice_type]||i.invoice_type)+'</td><td>'+amt+'</td><td>'+due+'</td><td>'+statusBadge+'</td><td>'+sentStr+'</td><td>'+action+'</td></tr>';
+  }).join('');
+}
+
+async function sendDraftInvoice(invoiceId){
+  var inv=_invoicesCache.find(function(i){return i.id===invoiceId});
+  if(!inv)return;
+  try {
+    var res=await fetch('https://zentrust.app.n8n.cloud/webhook/send-invoice',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        invoice_id: inv.id,
+        email: inv.recipient_email,
+        name: inv.recipient_name,
+        amount: parseFloat(inv.amount),
+        description: inv.description||(inv.invoice_type+' invoice'),
+        session_id: inv.session_id,
+        due_date: inv.due_date
+      })
+    });
+    var body=await res.json();
+    if(!body||!body.success)throw new Error(body&&body.error?body.error:'Stripe error');
+    showToast('Invoice sent!','success');
+    loadInvoices();
+  } catch(e){
+    showToast('Send failed: '+e.message,'error');
+  }
+}
+
+async function markInvoicePaid(invoiceId){
+  var{error}=await sb.from('invoices').update({status:'paid',paid_at:new Date().toISOString()}).eq('id',invoiceId);
+  if(error){showToast('Error: '+error.message,'error')}
+  else{showToast('Marked as paid','success');loadInvoices()}
+}
 
 function formatRevInput(input){var raw=input.value.replace(/[^0-9.]/g,'');var num=parseFloat(raw);if(!isNaN(num)&&num>0)input.value='$'+num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});else if(raw==='')input.value=''}
 async function saveRevenue(sessionId){var input=document.getElementById('rev-'+sessionId);if(!input)return;var rawVal=input.value.replace(/[^0-9.]/g,'');var amount=parseFloat(rawVal);if(isNaN(amount)||amount<=0){input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='rgba(255,255,255,0.1)'},1500);return}var{error}=await sb.from('leads').update({event_revenue:amount}).eq('session_id',sessionId);if(error){input.style.borderColor='var(--red)';showToast('Error saving revenue','error')}else{input.value='$'+amount.toLocaleString();input.style.borderColor='var(--green)';showToast('Revenue saved!','success');setTimeout(function(){input.style.borderColor='rgba(255,255,255,0.1)'},1500)}}
