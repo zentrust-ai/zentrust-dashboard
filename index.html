@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zentrust Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Avalon &middot; Concierge for Venues</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M 13 10 L 6 10 L 6 38 L 13 38' stroke='%237eb88c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M 35 10 L 42 10 L 42 38 L 35 38' stroke='%237eb88c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='24' cy='24' r='6' fill='%234ade80'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -13,7 +14,7 @@ html,body{height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 .login-box{width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 36px;text-align:center}
-.login-logo{font-size:28px;font-weight:700;margin-bottom:6px;color:#fff;letter-spacing:1.5px}
+.login-logo{margin-bottom:6px;display:flex;justify-content:center}
 .login-sub{font-size:13px;color:var(--text-secondary);margin-bottom:32px}
 .login-input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s;margin-bottom:12px}
 .login-input:focus{border-color:var(--accent)}
@@ -24,7 +25,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font
 .login-error{font-size:12px;color:var(--red);margin-top:12px;display:none}
 .app{display:none;min-height:100vh}
 .sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;z-index:10}
-.sidebar-logo{font-size:20px;font-weight:700;padding:0 24px;margin-bottom:32px;color:#fff;letter-spacing:1.5px}
+.sidebar-logo{padding:0 24px;margin-bottom:32px;display:flex}
 .sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 12px;flex:1}
 .sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;text-decoration:none;border:none;background:none;font-family:var(--font);width:100%;text-align:left}
 .sidebar-link:hover{background:rgba(255,255,255,0.04);color:var(--text)}
@@ -123,6 +124,18 @@ td.name-cell{color:var(--text);font-weight:500}
 .filter-clear:hover{border-color:var(--red);color:var(--red)}
 .empty-state{padding:48px 24px;text-align:center;color:var(--text-dim);font-size:13px}
 
+/* === AVALON BRAND === */
+.avalon-logo{display:inline-flex;align-items:center;gap:10px;font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:600;letter-spacing:-0.03em;color:#fafafa;line-height:1;text-decoration:none}
+.avalon-logo .av-mark{flex-shrink:0;display:inline-block}
+.avalon-logo .av-text{display:inline-block}
+.avalon-logo .av-dot{color:#4ade80;animation:avPulse 2.4s ease-in-out infinite}
+.avalon-logo.size-sidebar{font-size:22px}
+.avalon-logo.size-sidebar .av-mark{width:26px;height:26px}
+.avalon-logo.size-login{font-size:32px;gap:12px}
+.avalon-logo.size-login .av-mark{width:34px;height:34px}
+@keyframes avPulse{0%,100%{opacity:1}50%{opacity:0.55}}
+@media (prefers-reduced-motion: reduce){.avalon-logo .av-dot{animation:none}}
+
 /* Row action icon buttons */
 .row-actions{display:inline-flex;gap:6px;align-items:center}
 .icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--text-secondary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;padding:0}
@@ -203,7 +216,7 @@ th.sortable.active .sort-arrow{opacity:1}
 <body>
 <div class="login-page" id="login-page">
   <div class="login-box">
-    <div class="login-logo">ZENI</div>
+    <div class="login-logo"><span class="avalon-logo size-login"><svg class="av-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M 13 10 L 6 10 L 6 38 L 13 38" stroke="#7eb88c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M 35 10 L 42 10 L 42 38 L 35 38" stroke="#7eb88c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="24" r="5" fill="#4ade80"/></svg><span class="av-text">avalon<span class="av-dot">.</span></span></span></div>
     <div class="login-sub">Dashboard &mdash; Powered by Zentrust</div>
     <input class="login-input" type="email" id="login-email" placeholder="Email address">
     <input class="login-input" type="password" id="login-password" placeholder="Password">
@@ -213,7 +226,7 @@ th.sortable.active .sort-arrow{opacity:1}
 </div>
 <div class="login-page" id="reset-page" style="display:none;">
   <div class="login-box">
-    <div class="login-logo">ZENI</div>
+    <div class="login-logo"><span class="avalon-logo size-login"><svg class="av-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M 13 10 L 6 10 L 6 38 L 13 38" stroke="#7eb88c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M 35 10 L 42 10 L 42 38 L 35 38" stroke="#7eb88c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="24" r="5" fill="#4ade80"/></svg><span class="av-text">avalon<span class="av-dot">.</span></span></span></div>
     <div class="login-sub">Set your new password</div>
     <input class="login-input" type="password" id="reset-password" placeholder="New password (min 6 characters)">
     <input class="login-input" type="password" id="reset-confirm" placeholder="Confirm password">
@@ -225,7 +238,7 @@ th.sortable.active .sort-arrow{opacity:1}
 
 <div class="app" id="app">
   <div class="sidebar">
-    <div class="sidebar-logo">ZENI</div>
+    <div class="sidebar-logo"><span class="avalon-logo size-sidebar"><svg class="av-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M 13 10 L 6 10 L 6 38 L 13 38" stroke="#7eb88c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M 35 10 L 42 10 L 42 38 L 35 38" stroke="#7eb88c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="24" r="5" fill="#4ade80"/></svg><span class="av-text">avalon<span class="av-dot">.</span></span></span></div>
     <div class="venue-selector" id="venue-selector-wrap" style="display:none;">
       <label>Venue</label>
       <select id="venue-select" onchange="onVenueChange()"><option value="all">All Venues</option></select>
